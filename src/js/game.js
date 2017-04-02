@@ -1,6 +1,7 @@
 const PIXI = require('pixi.js');
 const EventEmitter = require('events').EventEmitter;
 const StageSet = require('./stageSet');
+const BackGround = require('./background');
 
 /**
  * This class represents the game as a whole. It is responsible for
@@ -35,6 +36,9 @@ module.exports = class Game extends EventEmitter {
     // Keep a reference to the stage sets we'll create
     this.stageSets = [];
 
+    // Keep reference to ship
+    this.ship = {};
+
     // Pixi creates a nested Hierarchie of DisplayObjects and Containers. The stage is just the outermost container
     this.stage = new PIXI.Container();
 
@@ -47,25 +51,30 @@ module.exports = class Game extends EventEmitter {
     // Frames are distributed unevenly - let's keep track of how much time has passed since the last one
     this._lastFrameTime = 0;
 
-
-    //draw the stage set
+    //cache game var for use inside sub-objects
     var _this = this;
+
+    //Add the background
+    this.stage.background = new BackGround({
+      parent: _this
+    });
+    //add the stage sets
     this.stageSets.push(new StageSet({
       equation: function (x) {
-        return 50 * Math.sin(x / 50) + Math.cos(x /100);
+        return 30 * Math.sin(x / 50) + Math.cos(x /100);
       },
-      stage: _this.stage,
-      renderer: _this.renderer,
-      color: "0x006600"
+      parent: _this,
+      depth: 0.3,
+      color: "0x002200"
     }));
 
     this.stageSets.push(new StageSet({
       equation: function (x) {
         return 25 * Math.cos(x /100) + 50 * Math.sin(x / 5000);
       },
-      stage: _this.stage,
-      renderer: _this.renderer,
-      color: "0x009900",
+      parent: _this,
+      depth: 1,
+      color: "0x003300",
       yOffset: Math.round(_this.renderer.height / 2 + 100)
     }));
 
@@ -89,9 +98,8 @@ module.exports = class Game extends EventEmitter {
 
     // store the time
     this._lastFrameTime = currentTime;
-
+    this.stage.background.draw();
     for (var i = 0; i < this.stageSets.length; i++) {
-      this.stageSets[i].xOffset += 0.5 * (i + 1) * Math.PI;
       this.stageSets[i].draw();
     }
     //console.log(this._lastFrameTime);

@@ -14,11 +14,13 @@ module.exports = class StageSet extends PIXI.Graphics {
     super();
 
     // user defined properties
-    this.stage = config.stage;
-    this.renderer = config.renderer;
+    this.stage = config.parent.stage;
+    this.renderer = config.parent.renderer;
     this.setColor = config.color;
     this.xOffset = config.xOffset || 0;
     this.yOffset = config.yOffset || Math.floor(this.renderer.height / 2);;
+    this.depth = config.depth || 0;
+
     this.lacunarity = 1.5;
     this.persistance = 0.5;
     this.equation = function (x) {
@@ -34,6 +36,7 @@ module.exports = class StageSet extends PIXI.Graphics {
 
   draw() {
     this.clear();
+    this.xOffset += this.depth;
     this.moveTo(this.minX, this.equation(this.minX + this.xOffset, this.lacunarity, this.persistance) + this.yOffset);
     this.beginFill(this.setColor);
     for (var x = this.minX + this.iteration; x <= this.maxX; x += this.iteration) {

@@ -1,6 +1,7 @@
 <!DOCTYPE HTML>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>For Terra</title>
     <style>
         html, body {
@@ -11,15 +12,22 @@
             overflow: hidden;
             // make sure no scrollbar
         }
-        body{
-            background-attachment:fixed;
-            background: white url(ressources/backgrounds/blue_sky.jpg) no-repeat top fixed;
-            -webkit-background-size: 100% 70%; /* pour anciens Chrome et Safari */
-            background-size: 100% 70%; /* version standardisée */
-        }
     </style>
-    <script defer src="./js/app.bundle.js"></script>
+    <link rel="manifest" href="manifest.json">
+
+    <script>
+      if (navigator.serviceWorker) {
+        navigator.serviceWorker.register('static/js/service-worker.js')
+          .then(function(){
+            console.log('service worker installed');
+          })
+          .catch(function(err){
+            console.log('Error', err);
+          });
+      }
+    </script>
 </head>
 <body>
+<script defer src="./js/app.bundle.js"></script>
 </body>
 </html>
