@@ -1,6 +1,6 @@
 const PIXI = require('pixi.js');
 const EventEmitter = require('events').EventEmitter;
-var StageSet = require('./stageSet');
+const StageSet = require('./stageSet');
 
 /**
  * This class represents the game as a whole. It is responsible for
@@ -32,14 +32,14 @@ module.exports = class Game extends EventEmitter {
     //cache for the element we are binding the game on
     this._element = element;
 
-    // Keep a reference to the spaceships we'll create
-    this.spaceShips = [];
+    // Keep a reference to the stage sets we'll create
+    this.stageSets = [];
 
     // Pixi creates a nested Hierarchie of DisplayObjects and Containers. The stage is just the outermost container
     this.stage = new PIXI.Container();
 
     // We want a renderer with a transparent background - ideally a WebGL one
-    this.renderer = PIXI.autoDetectRenderer(window.innerWidth - 5, window.innerHeight - 5, {transparent: true}, false);
+    this.renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight, {transparent: true}, false);
 
     // append the canvas created by the renderer to our DOM element
     this._element.appendChild(this.renderer.view);
@@ -50,49 +50,27 @@ module.exports = class Game extends EventEmitter {
 
     //draw the stage set
     var _this = this;
-    var stageSet = new StageSet({
+    this.stageSets.push(new StageSet({
       equation: function (x) {
-        return 50 * Math.sin(x / 50);
+        return 50 * Math.sin(x / 50) + Math.cos(x /100);
       },
-      'renderer': _this.renderer
-    });
-    stageSet.draw(_this.stage, "0x009900", 1);
+      stage: _this.stage,
+      renderer: _this.renderer,
+      color: "0x006600"
+    }));
+
+    this.stageSets.push(new StageSet({
+      equation: function (x) {
+        return 25 * Math.cos(x /100) + 50 * Math.sin(x / 5000);
+      },
+      stage: _this.stage,
+      renderer: _this.renderer,
+      color: "0x009900",
+      yOffset: Math.round(_this.renderer.height / 2 + 100)
+    }));
 
     // On the next frame, the show begins
     requestAnimationFrame(this._tick.bind(this));
-  }
-
-
-  /**
-   * Adds a new spaceship at a random position to the stage
-   *
-   * @param {String} name the name of the player
-   *
-   * @private
-   * @returns {void}
-   */
-  addPlayer(name) {
-    var x = this.renderer.width * ( 0.1 + Math.random() * 0.8 );
-    var y = this.renderer.height * ( 0.1 + Math.random() * 0.8 );
-    this.spaceShips.push("new SpaceShip");
-  }
-
-  /**
-   * Removes a spaceship from the stage, either as a result of it being
-   * destroyed or because a player disconnected
-   *
-   * @param   {String} name the name of the player associated with this ship
-   *
-   * @private
-   * @returns {void}
-   */
-  removePlayer(name) {
-    for (var i = 0; i < this.spaceShips.length; i++) {
-      if (this.spaceShips[i].name === name) {
-        this.spaceShips[i].remove();
-        this.spaceShips.splice(i, 1);
-      }
-    }
   }
 
   /**
@@ -111,6 +89,12 @@ module.exports = class Game extends EventEmitter {
 
     // store the time
     this._lastFrameTime = currentTime;
+
+    for (var i = 0; i < this.stageSets.length; i++) {
+      this.stageSets[i].xOffset += 0.5 * (i + 1) * Math.PI;
+      this.stageSets[i].draw();
+    }
+    //console.log(this._lastFrameTime);
 
     // render the next frame
     this.renderer.render(this.stage);

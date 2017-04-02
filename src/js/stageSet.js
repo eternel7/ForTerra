@@ -14,7 +14,11 @@ module.exports = class StageSet extends PIXI.Graphics {
     super();
 
     // user defined properties
+    this.stage = config.stage;
     this.renderer = config.renderer;
+    this.setColor = config.color;
+    this.xOffset = config.xOffset || 0;
+    this.yOffset = config.yOffset || Math.floor(this.renderer.height / 2);;
     this.lacunarity = 1.5;
     this.persistance = 0.5;
     this.equation = function (x) {
@@ -28,16 +32,20 @@ module.exports = class StageSet extends PIXI.Graphics {
     this.iteration = (this.maxX - this.minX) / 1000;
   }
 
-  draw(stage, color, thickness) {
-    var middle = Math.floor(this.renderer.height / 2);
-    this.moveTo(this.minX, this.equation(this.minX, this.lacunarity, this.persistance) + middle);
-    this.lineStyle(thickness, color);
-    console.log(color, thickness);
+  draw() {
+    this.clear();
+    this.moveTo(this.minX, this.equation(this.minX + this.xOffset, this.lacunarity, this.persistance) + this.yOffset);
+    this.beginFill(this.setColor);
     for (var x = this.minX + this.iteration; x <= this.maxX; x += this.iteration) {
-      var y = this.equation(x, this.lacunarity, this.persistance);
+      var y = this.equation(x + this.xOffset, this.lacunarity, this.persistance);
       //console.log(x,y, y + middle);
-      this.lineTo(x, y + middle);
+      this.lineTo(x, y + this.yOffset);
     }
-    stage.addChild(this);
+    //last points
+    this.lineTo(this.maxX, this.equation(this.maxX + this.xOffset, this.lacunarity, this.persistance) + this.yOffset);
+    this.lineTo(this.maxX,this.renderer.height);
+    this.lineTo(this.minX,this.renderer.height);
+    this.endFill();
+    this.stage.addChild(this);
   }
 }

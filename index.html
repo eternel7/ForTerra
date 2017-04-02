@@ -3,15 +3,23 @@
 <head>
     <title>For Terra</title>
     <style>
-        body {
+        html, body {
+            width: 100%;
+            height: 100%;
             margin: 0px;
             padding: 0px;
+            overflow: hidden;
+            // make sure no scrollbar
         }
-
+        body{
+            background-attachment:fixed;
+            background: white url(ressources/backgrounds/blue_sky.jpg) no-repeat top fixed;
+            -webkit-background-size: 100% 70%; /* pour anciens Chrome et Safari */
+            background-size: 100% 70%; /* version standardisée */
+        }
     </style>
     <script defer src="./js/app.bundle.js"></script>
 </head>
 <body>
-
 </body>
 </html>
