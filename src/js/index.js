@@ -1,12 +1,24 @@
 const PIXI = require('pixi.js');
-const Game = require( './game.js' );
+const Game = require('./game.js');
 
-PIXI.loader
-  .add("background","static/resources/backgrounds/starry_night_sky.jpg")
-//  .add("background","static/resources/backgrounds/blue_sky.jpg")
-//  .add("background","static/resources/backgrounds/landscape.svg")
-  .add("planes","static/resources/ships/planes_left.png")
+PIXI.loader.add([
+  {name: 'skySpritesheet', url: 'static/resources/images/backgrounds/sky/sky.json'},
+  {name: "background", url: "static/resources/images/backgrounds/stars_white.png"},
+  {name: "ships", url: "static/resources/images/ships/wc2ships_sheet.png"},
+  {name: 'explosionSpritesheet', url: 'static/resources/images/shoots/explosion.json'}])
+  .on("progress", loadProgressHandler)
   .load(setup);
+
+function loadProgressHandler(loader, resource) {
+
+  //Display the file `url` currently being loaded
+  //console.log("loading: " + resource.url);
+  console.log("loading: " + resource.name);
+
+  //Display the percentage of files currently loaded
+  console.log("progress: " + Math.floor(loader.progress) + "%");
+
+}
 
 function setup() {
   new Game(document.body);

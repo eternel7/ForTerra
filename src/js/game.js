@@ -2,6 +2,8 @@ const PIXI = require('pixi.js');
 const EventEmitter = require('events').EventEmitter;
 const StageSet = require('./stageSet');
 const BackGround = require('./background');
+const Ship = require('./ship');
+const Controls = require('./controls');
 
 /**
  * This class represents the game as a whole. It is responsible for
@@ -36,9 +38,6 @@ module.exports = class Game extends EventEmitter {
     // Keep a reference to the stage sets we'll create
     this.stageSets = [];
 
-    // Keep reference to ship
-    this.ship = {};
-
     // Pixi creates a nested Hierarchie of DisplayObjects and Containers. The stage is just the outermost container
     this.stage = new PIXI.Container();
 
@@ -54,6 +53,12 @@ module.exports = class Game extends EventEmitter {
     //cache game var for use inside sub-objects
     var _this = this;
 
+    // Keep reference to ship first because all is based on its movements
+    this.ship = new Ship({
+      parent: _this,
+      color: false
+    });
+
     //Add the background
     this.stage.background = new BackGround({
       parent: _this
@@ -61,7 +66,7 @@ module.exports = class Game extends EventEmitter {
     //add the stage sets
     this.stageSets.push(new StageSet({
       equation: function (x) {
-        return 30 * Math.sin(x / 50) + Math.cos(x /100);
+        return 30 * Math.sin(x / 50) + Math.cos(x / 100);
       },
       parent: _this,
       depth: 0.3,
@@ -70,13 +75,15 @@ module.exports = class Game extends EventEmitter {
 
     this.stageSets.push(new StageSet({
       equation: function (x) {
-        return 25 * Math.cos(x /100) + 50 * Math.sin(x / 5000);
+        return 25 * Math.cos(x / 100) + 50 * Math.sin(x / 5000);
       },
       parent: _this,
       depth: 1,
       color: "0x003300",
       yOffset: Math.round(_this.renderer.height / 2 + 100)
     }));
+
+    this.conrtols = new Controls({ parent: _this });
 
     // On the next frame, the show begins
     requestAnimationFrame(this._tick.bind(this));
@@ -104,6 +111,9 @@ module.exports = class Game extends EventEmitter {
     }
     //console.log(this._lastFrameTime);
 
+    // make the ship move a little
+    this.ship.count += 0.01;
+    this.ship.draw();
     // render the next frame
     this.renderer.render(this.stage);
 
