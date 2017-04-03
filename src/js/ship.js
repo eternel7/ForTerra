@@ -1,4 +1,5 @@
 const PIXI = require('pixi.js');
+const control = require('./controls');
 
 module.exports = class Ship {
 
@@ -12,9 +13,16 @@ module.exports = class Ship {
     this.xOffset = config.xOffset || 250;
     this.yOffset = config.yOffset || Math.floor(this.renderer.height / 3);
     this.depth = 1;
-    this.acceleration = 0.5;
-    this.dx = 0.5;
-    this.dy = 2;
+    this.acceleration = 0.1;
+    this.dx = 5;
+    this.dy = 5;
+
+    // container
+    this._container = new PIXI.Container();
+    this._container.position.x = this.xOffset;
+    this._container.position.y = this.yOffset;
+
+
     this.texture = (config.texture || PIXI.utils.TextureCache["ships"]);
 
 
@@ -27,32 +35,25 @@ module.exports = class Ship {
 
     //Create the ship from the texture
     this._ship = new PIXI.Sprite(this.texture);
+    //Face right
     this._ship.scale.x = -1;
+
     if (this.shipColor) {
       this._ship.tint = this.shipColor;
     }
 
     // create a random instability for the ship between 1 - 5
-    this.instability = (1 + Math.random() * 5) / 3;
-
-    // this number will be used to modify the direction of the ship over time
-    this.turningSpeed = Math.random() - 0.8;
+    this.instability = (1 + Math.random() * 5);
 
     // create a random speed for the ship between 1 - 3
     this.vx = Math.random() * 2 + 1;
     this.vy = Math.random() * 2 + 1;
   }
 
-  roundPrec(num, dec) {
-    var precise = Math.pow(10, dec);
-    return Math.round(num * precise) / precise;
-  }
-
   accelerateX(more){
     if(more===true){
       this.xOffset += this.dx;
       this.vx += this.acceleration;
-
     } else {
       this.xOffset -= this.dx;
       this.vx -= this.acceleration;
@@ -67,6 +68,27 @@ module.exports = class Ship {
       this.yOffset -= this.dy;
       this.vy -= this.acceleration;
     }
+  }
+
+  update() {
+    //Capture the keyboard arrow keys
+    if (control.isDown(control.UP)) {
+      this.accelerateY(false);
+    }
+    if (control.isDown(control.LEFT)) {
+      this.accelerateX(false);
+    }
+    if (control.isDown(control.DOWN)) {
+      this.accelerateY(true);
+    }
+    if (control.isDown(control.RIGHT)) {
+      this.accelerateX(true);
+    }
+  }
+
+  roundPrec(num, dec) {
+    var precise = Math.pow(10, dec);
+    return Math.round(num * precise) / precise;
   }
 
   draw() {

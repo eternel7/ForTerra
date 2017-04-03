@@ -3,7 +3,6 @@ const EventEmitter = require('events').EventEmitter;
 const StageSet = require('./stageSet');
 const BackGround = require('./background');
 const Ship = require('./ship');
-const Controls = require('./controls');
 
 /**
  * This class represents the game as a whole. It is responsible for
@@ -83,8 +82,6 @@ module.exports = class Game extends EventEmitter {
       yOffset: Math.round(_this.renderer.height / 2 + 100)
     }));
 
-    this.conrtols = new Controls({ parent: _this });
-
     // On the next frame, the show begins
     requestAnimationFrame(this._tick.bind(this));
   }
@@ -110,6 +107,9 @@ module.exports = class Game extends EventEmitter {
       this.stageSets[i].draw();
     }
     //console.log(this._lastFrameTime);
+
+    // make the ship respond to keyboard
+    this.ship.update();
 
     // make the ship move a little
     this.ship.count += 0.01;

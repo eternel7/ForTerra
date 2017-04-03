@@ -22,13 +22,13 @@ module.exports = class Background {
     this.sky = new PIXI.Sprite(skies["BGSkyBlue4.png"]);
 
     this.sky.width = this.renderer.width;
-    this.sky.height = this.renderer.height * 5 ;
+    this.sky.height = this.renderer.height * 5;
   }
 
   draw() {
     this.xOffset += this.depth * this.ship.vx;
     this.bg.tilePosition.x = 0 - this.xOffset;
     this.bg.tilePosition.y = 0;
-    this.stage.addChild(this.sky,this.bg);
+    this.stage.addChild(this.sky, this.bg);
   }
 }
