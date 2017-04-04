@@ -32,24 +32,25 @@ module.exports = class Ship {
         h: 52
       },
       a: {
-        x: 1732,
-        y: 1936,
-        w: 122,
-        h: 57
+        x: 1730,
+        y: 1356,
+        w: 127,
+        h: 48
       },
       b: {
         x: 1732,
-        y: 2000,
-        w: 98,
-        h: 69
+        y: 1302,
+        w: 103,
+        h: 44
       },
       vertical: {
-        x: 1733,
-        y: 2078,
-        w: 103,
-        h: 67
+        x: 1730,
+        y: 1249,
+        w: 109,
+        h: 46
       }
-    }
+    };
+
     // container
     this._container = new PIXI.Container();
     this._container.position.x = this.xOffset;
@@ -91,18 +92,40 @@ module.exports = class Ship {
     //manage ship speed and position
     var posMargin = 2 * this.instability;
     if (more === true) {
-      if (this.xOffset <= this.renderer.width - posMargin - this.sprites.horizontal.w &&
-        this.xOffset >= 0 - posMargin - this.spriteW) {
-        this.xOffset += this.dx;
-      }
+      this.xOffset = Math.min(this.xOffset + this.dx, this.renderer.width - posMargin - 2*this.sprites.horizontal.w);
       this.vx = Math.min(this.vx + this.acceleration, this.maxSpeed);
     } else {
-      if (this.xOffset <= this.renderer.width + posMargin &&
-        this.xOffset >= 0 + posMargin + 2 * this.sprites.horizontal.w) {
-        this.xOffset -= this.dx;
-      }
+      this.xOffset = Math.max(this.xOffset - this.dy, posMargin + 2*this.sprites.horizontal.w);
       this.vx = Math.max(this.vx - this.acceleration, -1 * this.maxSpeed);
     }
+  }
+
+  accelerateY(more) {
+    if (more === true) {
+      this.yOffset = Math.min(this.yOffset + this.dy, this.renderer.height - this.sprites.horizontal.h);
+    } else {
+      this.yOffset = Math.max(this.yOffset - this.dy, 0);
+    }
+  }
+
+  catchControl(){
+    //Capture the keyboard arrow keys
+    if (control.isDown(control.UP)) {
+      this.accelerateY(false);
+    }
+    if (control.isDown(control.LEFT)) {
+      this.accelerateX(false);
+    }
+    if (control.isDown(control.DOWN)) {
+      this.accelerateY(true);
+    }
+    if (control.isDown(control.RIGHT)) {
+      this.accelerateX(true);
+    }
+  }
+
+  update() {
+    this.catchControl();
     //update texture for animation of the turn in speed
     if(Math.abs(this.vx)>3){
       //Tell the texture to use that rectangular section
@@ -133,30 +156,6 @@ module.exports = class Ship {
     }
   }
 
-  accelerateY(more) {
-    if (more === true) {
-      this.yOffset = Math.min(this.yOffset + this.dy, this.renderer.height - this.sprites.horizontal.h);
-    } else {
-      this.yOffset = Math.max(this.yOffset - this.dy, 0);
-    }
-  }
-
-  update() {
-    //Capture the keyboard arrow keys
-    if (control.isDown(control.UP)) {
-      this.accelerateY(false);
-    }
-    if (control.isDown(control.LEFT)) {
-      this.accelerateX(false);
-    }
-    if (control.isDown(control.DOWN)) {
-      this.accelerateY(true);
-    }
-    if (control.isDown(control.RIGHT)) {
-      this.accelerateX(true);
-    }
-  }
-
   roundPrec(num, dec) {
     var precise = Math.pow(10, dec);
     return Math.round(num * precise) / precise;
@@ -180,6 +179,6 @@ module.exports = class Ship {
       });
     debugText.x = this._ship.x - 140;
     debugText.y = this._ship.y + 60;
-    this.stage.addChild(this._ship, debugText);
+    this.stage.addChild(this._ship);
   }
 }
