@@ -25,7 +25,7 @@ module.exports = class Ship {
     this.spriteH = 52;
 
     this.sprites = {
-      std: {
+      horizontal: {
         x: 1734,
         y: 1408,
         w: 122,
@@ -36,6 +36,18 @@ module.exports = class Ship {
         y: 1936,
         w: 122,
         h: 57
+      },
+      b: {
+        x: 1732,
+        y: 2000,
+        w: 98,
+        h: 69
+      },
+      vertical: {
+        x: 1733,
+        y: 2078,
+        w: 103,
+        h: 67
       }
     }
     // container
@@ -48,18 +60,20 @@ module.exports = class Ship {
 
     //Create a rectangle object that defines the position and
     //size of the sub-image you want to extract from the texture
-    this.stdRect = new PIXI.Rectangle(this.sprites.std.x,
-      this.sprites.std.y,
-      this.sprites.std.w,
-      this.sprites.std.h);
+    this.Rect = {};
+    for(var pos in this.sprites){
+      this.Rect[pos] = new PIXI.Rectangle(this.sprites[pos].x,
+        this.sprites[pos].y,
+        this.sprites[pos].w,
+        this.sprites[pos].h)
+    }
 
     //Tell the texture to use that rectangular section
-    this.texture.frame = this.stdRect;
+    this.texture.frame = this.Rect.vertical;
 
     //Create the ship from the texture
     this._ship = new PIXI.Sprite(this.texture);
-    //Face right
-    this._ship.scale.x = -1;
+    this._ship.anchor = new PIXI.Point(0.5, 0.5);
 
     if (this.shipColor) {
       this._ship.tint = this.shipColor;
@@ -69,26 +83,47 @@ module.exports = class Ship {
     this.instability = (1 + Math.random() * 5);
 
     // create a random speed for the ship between 1 - 3
-    this.vx = Math.random() * 2 + 1;
+    this.vx = 0;
     this.vy = Math.random() * 2 + 1;
   }
 
   accelerateX(more) {
+    //manage ship speed and position
     var posMargin = 2 * this.instability;
     if (more === true) {
-      if (this.xOffset <= this.renderer.width - posMargin - this.sprites.std.w &&
+      if (this.xOffset <= this.renderer.width - posMargin - this.sprites.horizontal.w &&
         this.xOffset >= 0 - posMargin - this.spriteW) {
         this.xOffset += this.dx;
       }
       this.vx = Math.min(this.vx + this.acceleration, this.maxSpeed);
     } else {
       if (this.xOffset <= this.renderer.width + posMargin &&
-        this.xOffset >= 0 + posMargin + 2 * this.sprites.std.w) {
+        this.xOffset >= 0 + posMargin + 2 * this.sprites.horizontal.w) {
         this.xOffset -= this.dx;
       }
       this.vx = Math.max(this.vx - this.acceleration, -1 * this.maxSpeed);
     }
+    //update texture for animation of the turn in speed
+    if(Math.abs(this.vx)>3){
+      //Tell the texture to use that rectangular section
+      this.texture.frame = this.Rect.horizontal;
+    } else if(Math.abs(this.vx)>2){
+      //Tell the texture to use that rectangular section
+      this.texture.frame = this.Rect.a;
+
+    } else if(Math.abs(this.vx)>1){
+      //Tell the texture to use that rectangular section
+      this.texture.frame = this.Rect.b;
+
+    }else if(Math.abs(this.vx)>=0){
+      //Tell the texture to use that rectangular section
+      this.texture.frame = this.Rect.vertical;
+    }
+    //Create the ship from the texture
+    this._ship = new PIXI.Sprite(this.texture);
+
     //ship orientation
+    this._ship.anchor = new PIXI.Point(0.5, 0.5);
     if (this.vx < 0 && this._ship.scale.x < 0) {
       this._ship.scale.x = 1;
     } else {
@@ -100,7 +135,7 @@ module.exports = class Ship {
 
   accelerateY(more) {
     if (more === true) {
-      this.yOffset = Math.min(this.yOffset + this.dy, this.renderer.height - this.sprites.std.h);
+      this.yOffset = Math.min(this.yOffset + this.dy, this.renderer.height - this.sprites.horizontal.h);
     } else {
       this.yOffset = Math.max(this.yOffset - this.dy, 0);
     }
