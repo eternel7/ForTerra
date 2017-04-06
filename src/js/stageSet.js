@@ -38,15 +38,15 @@ module.exports = class StageSet extends PIXI.Graphics {
   draw() {
     this.clear();
     this.xOffset += this.depth * this.ship.vx;
-    this.moveTo(this.minX, this.equation(this.minX + this.xOffset, this.lacunarity, this.persistance) + this.yOffset);
+    this.moveTo(this.minX, this.equation(this.minX + this.xOffset) + this.yOffset);
     this.beginFill(this.setColor);
     for (var x = this.minX + this.iteration; x <= this.maxX; x += this.iteration) {
-      var y = this.equation(x + this.xOffset, this.lacunarity, this.persistance);
+      var y = this.equation(x + this.xOffset);
       //console.log(x,y, y + middle);
       this.lineTo(x, y + this.yOffset);
     }
     //last points
-    this.lineTo(this.maxX, this.equation(this.maxX + this.xOffset, this.lacunarity, this.persistance) + this.yOffset);
+    this.lineTo(this.maxX, this.equation(this.maxX + this.xOffset) + this.yOffset);
     this.lineTo(this.maxX,this.renderer.height);
     this.lineTo(this.minX,this.renderer.height);
     this.endFill();

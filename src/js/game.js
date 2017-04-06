@@ -62,6 +62,7 @@ module.exports = class Game extends EventEmitter {
     this.stage.background = new BackGround({
       parent: _this
     });
+
     //add the stage sets
     this.stageSets.push(new StageSet({
       equation: function (x) {
@@ -81,6 +82,9 @@ module.exports = class Game extends EventEmitter {
       color: "0x003300",
       yOffset: Math.round(_this.renderer.height / 2 + 100)
     }));
+
+    //set the ground as one of the stage set
+    this.ground =  this.stageSets[1];
 
     // On the next frame, the show begins
     requestAnimationFrame(this._tick.bind(this));
@@ -111,8 +115,6 @@ module.exports = class Game extends EventEmitter {
     // make the ship respond to keyboard
     this.ship.update();
 
-    // make the ship move a little
-    this.ship.count += 0.01;
     this.ship.draw();
     // render the next frame
     this.renderer.render(this.stage);

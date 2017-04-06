@@ -24,7 +24,7 @@ PIXI.loader.add([
   {name: 'skySpritesheet', url: 'static/resources/images/backgrounds/sky/sky.json'},
   {name: "background", url: "static/resources/images/backgrounds/stars_white.png"},
   {name: "ships", url: "static/resources/images/ships/wc2ships_sheet.png"},
-  {name: 'explosionSpritesheet', url: 'static/resources/images/shoots/explosion.json'}])
+  {name: 'explosion', url: 'static/resources/images/explosions/images/explosion/expl_11_0009.png'}])
   .on("progress", loadProgressHandler.bind(this))
   .load(setup)
   .once('complete', onReady.bind(this));
