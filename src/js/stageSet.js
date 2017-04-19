@@ -26,13 +26,17 @@ module.exports = class StageSet extends PIXI.Graphics {
     this.persistance = 0.5;
     this.equation = function (x) {
       var y = config.equation(x) +
-        Math.pow(this.persistance,1) * config.equation(x*Math.pow(this.lacunarity,2)) +
-        Math.pow(this.persistance,2) * config.equation(x*Math.pow(this.lacunarity,4));
+        Math.pow(this.persistance, 1) * config.equation(x * Math.pow(this.lacunarity, 2)) +
+        Math.pow(this.persistance, 2) * config.equation(x * Math.pow(this.lacunarity, 4));
       return y;
     };
     this.minX = 0;
     this.maxX = this.renderer.width;
     this.iteration = (this.maxX - this.minX) / 1000;
+  }
+
+  update() {
+    this.draw();
   }
 
   draw() {
@@ -47,8 +51,8 @@ module.exports = class StageSet extends PIXI.Graphics {
     }
     //last points
     this.lineTo(this.maxX, this.equation(this.maxX + this.xOffset) + this.yOffset);
-    this.lineTo(this.maxX,this.renderer.height);
-    this.lineTo(this.minX,this.renderer.height);
+    this.lineTo(this.maxX, this.renderer.height);
+    this.lineTo(this.minX, this.renderer.height);
     this.endFill();
     this.stage.addChild(this);
   }

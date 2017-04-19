@@ -25,6 +25,10 @@ module.exports = class Background {
     this.sky.height = this.renderer.height * 5;
   }
 
+  update() {
+    this.draw();
+  }
+
   draw() {
     this.xOffset += this.depth * this.ship.vx;
     this.bg.tilePosition.x = 0 - this.xOffset;

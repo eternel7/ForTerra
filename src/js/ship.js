@@ -4,31 +4,36 @@ const Bump = require('./collision');
 const bump = new Bump();
 
 module.exports = class Ship {
+  roundPrec(num, dec) {
+    var precise = Math.pow(10, dec);
+    return Math.round(num * precise) / precise;
+  }
+
+  pad(n, width, z) {
+    z = z || '0';
+    n = n + '';
+    return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+  }
 
   constructor(config) {
 
     // user defined properties
-    this.parent = config.parent;
+    this._game = config.parent;
     this.stage = config.parent.stage;
     this.renderer = config.parent.renderer;
     this.shipColor = config.color || false;
     this.count = 0;
     this.xOffset = config.xOffset || Math.floor(this.renderer.width / 2);
-    this.yOffset = config.yOffset || Math.floor(this.renderer.height / 3);
+    this.yOffset = config.yOffset || Math.floor(this.renderer.height / 4);
     this.depth = 1;
-    this.acceleration = 0.1;
+    this.acceleration = 2 / 100;
     this.maxSpeed = 30;
-    this.dx = 5;
-    this.dy = 5;
+    this.dx = 5 / 20;
+    this.dy = 5 / 20;
 
     this.state = 1; // -1 boom - 1 start - other number for other animations
 
     //ship size and position in sprite sheet
-    this.spriteX = 1734;
-    this.spriteY = 1408;
-    this.spriteW = 122;
-    this.spriteH = 52;
-
     this.sprites = {
       horizontal: {
         x: 1734,
@@ -80,7 +85,11 @@ module.exports = class Ship {
     }
 
     //manage explosion animation
-    this.explosion = new PIXI.Sprite(PIXI.utils.TextureCache["explosion"]);
+    this.explosions = [];
+    this.explosionSteps = 31;
+    for (var i = 0; i <= this.explosionSteps; i++) {
+      this.explosions.push(new PIXI.Sprite(PIXI.utils.TextureCache["explosion" + this.pad(i, 2, '0')]));
+    }
     // create a random instability for the ship between 1 - 5
     this.instability = (1 + Math.random() * 5);
 
@@ -89,45 +98,45 @@ module.exports = class Ship {
     this.vy = Math.random() * 2 + 1;
   }
 
-  accelerateX(more) {
+  accelerateX(more, dt, t) {
     //manage ship speed and position
     var posMargin = 2 * this.instability;
     if (more === true) {
-      this.xOffset = Math.min(this.xOffset + this.dx, this.renderer.width - posMargin - 2 * this.sprites.horizontal.w);
-      this.vx = Math.min(this.vx + this.acceleration, this.maxSpeed);
+      this.xOffset = Math.min(this.xOffset + this.dx * dt, this.renderer.width - posMargin - 2 * this.sprites.horizontal.w);
+      this.vx = Math.min(this.vx + this.acceleration * dt, this.maxSpeed);
     } else {
-      this.xOffset = Math.max(this.xOffset - this.dy, posMargin + 2 * this.sprites.horizontal.w);
-      this.vx = Math.max(this.vx - this.acceleration, -1 * this.maxSpeed);
+      this.xOffset = Math.max(this.xOffset - this.dy * dt, posMargin + 2 * this.sprites.horizontal.w);
+      this.vx = Math.max(this.vx - this.acceleration * dt, -1 * this.maxSpeed);
     }
   }
 
-  accelerateY(more) {
+  accelerateY(more, dt, t) {
     if (more === true) {
-      this.yOffset = Math.min(this.yOffset + this.dy, this.renderer.height - this.sprites.horizontal.h);
+      this.yOffset = Math.min(this.yOffset + this.dy * dt, this.renderer.height - this.sprites.horizontal.h);
     } else {
-      this.yOffset = Math.max(this.yOffset - this.dy, 0);
+      this.yOffset = Math.max(this.yOffset - this.dy * dt, 0);
     }
   }
 
-  catchControl() {
+  catchControl(dt, t) {
     //Capture the keyboard arrow keys
     if (control.isDown(control.UP)) {
-      this.accelerateY(false);
+      this.accelerateY(false, dt, t);
     }
     if (control.isDown(control.LEFT)) {
-      this.accelerateX(false);
+      this.accelerateX(false, dt, t);
     }
     if (control.isDown(control.DOWN)) {
-      this.accelerateY(true);
+      this.accelerateY(true, dt, t);
     }
     if (control.isDown(control.RIGHT)) {
-      this.accelerateX(true);
+      this.accelerateX(true, dt, t);
     }
   }
 
   testCollision() {
     var ship = this._ship;
-    var ground = this.parent.ground;
+    var ground = this._game.ground;
     //search of ground y min and y max
     var rectX = Math.round(ship.x - this.texture.frame.width / 2);
     var yg1 = ground.equation(rectX + ground.xOffset);
@@ -145,27 +154,48 @@ module.exports = class Ship {
     return bump.hitTestRectangle(shipRect, groundRect);
   }
 
-  updateState() {
-    //test collision
-    if (this.testCollision()) {
-      this.state = -1;
-      this.stateStep = 0;
+  updateExplosion() {
+    if(this.vx!=0){
+      var direction = Math.round(Math.abs(this.vx)/this.vx);
+      this.vx = direction * Math.max(0, Math.abs(this.vx) - 1 * this.acceleration*100);
+    }
+    //this.xOffset = Math.max( Math.floor(this.renderer.width / 2), this.xOffset - 1);
+  }
+
+  drawExplosion(dt,t) {
+    var ship = this._ship;
+    var explosionSpeed = 4;
+    var explosionStep = Math.floor((this.stateStep*explosionSpeed)/dt) + 1;
+    if (explosionStep <= this.explosionSteps) {
+      this._ship = this.explosions[explosionStep];
+      this._ship.anchor = new PIXI.Point(0.5, 0.5);
+      var ground = this._game.ground;
+      ship.y = Math.max(ship.y - 1, ground.equation(ship.x + ground.xOffset) + ground.yOffset);
+    } else {
+      this._ship = this.explosions[this.explosionSteps];
+      this._ship.anchor = new PIXI.Point(0.5, 0.5);
     }
   }
 
-  update() {
+  updateState() {
+    //test collision
+    if (this.state != -1 && this.testCollision()) {
+      this.state = -1;
+      this.stateStep = 0;
+    }
+    this.stateStep = this.stateStep + 1 || 0;
+  }
+
+  update(dt, t) {
     // make the ship move a little
     this.count += 0.01;
 
     this.updateState();
 
     if (this.state == -1) {
-      this._ship = this.explosion;
-      this.stateStep += 1;
-      this.vx = 0;
-      this._ship.anchor = new PIXI.Point(0.5, 0.5);
+      this.updateExplosion();
     } else {
-      this.catchControl();
+      this.catchControl(dt, t);
       //update texture for animation of the turn in speed
       if (Math.abs(this.vx) > 2.5) {
         //Tell the texture to use that rectangular section
@@ -173,20 +203,18 @@ module.exports = class Ship {
       } else if (Math.abs(this.vx) > 1.5) {
         //Tell the texture to use that rectangular section
         this.texture.frame = this.Rect.a;
-
       } else if (Math.abs(this.vx) > 0.5) {
         //Tell the texture to use that rectangular section
         this.texture.frame = this.Rect.b;
-
       } else {
         //Tell the texture to use that rectangular section
         this.texture.frame = this.Rect.vertical;
       }
       //Create the ship from the texture
       this._ship = new PIXI.Sprite(this.texture);
+      this._ship.anchor = new PIXI.Point(0.5, 0.5);
 
       //ship orientation
-      this._ship.anchor = new PIXI.Point(0.5, 0.5);
       if (this.vx < 0 && this._ship.scale.x < 0) {
         this._ship.scale.x = 1;
       } else {
@@ -195,18 +223,16 @@ module.exports = class Ship {
         }
       }
     }
+    this.draw(dt,t);
   }
 
-  roundPrec(num, dec) {
-    var precise = Math.pow(10, dec);
-    return Math.round(num * precise) / precise;
-  }
-
-  draw() {
+  draw(dt,t) {
     var ship = this._ship;
     ship.x = this.xOffset;
     ship.y = this.yOffset;
-    if (this.state != -1) {
+    if (this.state == -1) {
+      this.drawExplosion(dt,t);
+    } else if (this.state != -1) {
       //make the ship move a little
       ship.x += Math.sin(this.count * 5) * this.instability + this.vx;
       ship.y += Math.cos(this.count * 3) * this.instability;
@@ -220,8 +246,8 @@ module.exports = class Ship {
         fill: '#efefef',
         align: 'left'
       });
-    debugText.x = this._ship.x - 140;
-    debugText.y = this._ship.y + 60;
-    this.stage.addChild(this._ship);
+    debugText.x = ship.x - 140;
+    debugText.y = ship.y + 60;
+    this.stage.addChild(ship);
   }
 }

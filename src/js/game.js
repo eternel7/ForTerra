@@ -34,8 +34,8 @@ module.exports = class Game extends EventEmitter {
     //cache for the element we are binding the game on
     this._element = element;
 
-    // Keep a reference to the stage sets we'll create
-    this.stageSets = [];
+    // Keep a reference to the components we will update on each frame
+    this.components = [];
 
     // Pixi creates a nested Hierarchie of DisplayObjects and Containers. The stage is just the outermost container
     this.stage = new PIXI.Container();
@@ -62,9 +62,10 @@ module.exports = class Game extends EventEmitter {
     this.stage.background = new BackGround({
       parent: _this
     });
+    this.components.push(this.stage.background);
 
     //add the stage sets
-    this.stageSets.push(new StageSet({
+    this.components.push(new StageSet({
       equation: function (x) {
         return 30 * Math.sin(x / 50) + Math.cos(x / 100);
       },
@@ -72,8 +73,7 @@ module.exports = class Game extends EventEmitter {
       depth: 0.3,
       color: "0x002200"
     }));
-
-    this.stageSets.push(new StageSet({
+    this.ground = new StageSet({
       equation: function (x) {
         return 25 * Math.cos(x / 100) + 50 * Math.sin(x / 5000);
       },
@@ -81,10 +81,11 @@ module.exports = class Game extends EventEmitter {
       depth: 1,
       color: "0x003300",
       yOffset: Math.round(_this.renderer.height / 2 + 100)
-    }));
+    });
+    this.components.push(this.ground);
 
-    //set the ground as one of the stage set
-    this.ground =  this.stageSets[1];
+    // Add ship last to draw it on top
+    this.components.push(this.ship);
 
     // On the next frame, the show begins
     requestAnimationFrame(this._tick.bind(this));
@@ -100,22 +101,14 @@ module.exports = class Game extends EventEmitter {
    * @returns {void}
    */
   _tick(currentTime) {
-    // notify objects of the impeding update. This gives ships time to reposition
-    // themselves, bullets to move etc.
-    this.emit('update', currentTime - this._lastFrameTime, currentTime);
-
-    // store the time
-    this._lastFrameTime = currentTime;
-    this.stage.background.draw();
-    for (var i = 0; i < this.stageSets.length; i++) {
-      this.stageSets[i].draw();
+    for (var i = 0; i < this.components.length; i++) {
+      this.components[i].update(currentTime - this._lastFrameTime, currentTime);
     }
     //console.log(this._lastFrameTime);
 
-    // make the ship respond to keyboard
-    this.ship.update();
+    // store the time
+    this._lastFrameTime = currentTime;
 
-    this.ship.draw();
     // render the next frame
     this.renderer.render(this.stage);
 
