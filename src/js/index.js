@@ -16,7 +16,7 @@ function setup() {
   new Game(document.body);
 }
 
-function onReady(){
+function onReady() {
   console.log("Ready!!!");
 }
 
@@ -55,8 +55,9 @@ PIXI.loader.add([
   {name: 'explosion29', url: 'static/resources/images/explosions/images/explosion/expl_06_0028.png'},
   {name: 'explosion30', url: 'static/resources/images/explosions/images/explosion/expl_06_0029.png'},
   {name: 'explosion31', url: 'static/resources/images/explosions/images/explosion/expl_06_0030.png'},
-  {name: 'explosion32', url: 'static/resources/images/explosions/images/explosion/expl_06_0031.png'}
-  ])
+  {name: 'explosion32', url: 'static/resources/images/explosions/images/explosion/expl_06_0031.png'},
+  {name: 'bullets', url: 'static/resources/images/shoots/beams.png'}
+])
   .on("progress", loadProgressHandler.bind(this))
   .load(setup)
   .once('complete', onReady.bind(this));

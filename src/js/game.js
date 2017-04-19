@@ -3,6 +3,7 @@ const EventEmitter = require('events').EventEmitter;
 const StageSet = require('./stageSet');
 const BackGround = require('./background');
 const Ship = require('./ship');
+const BulletManager = require('./bullet-manager');
 
 /**
  * This class represents the game as a whole. It is responsible for
@@ -55,8 +56,15 @@ module.exports = class Game extends EventEmitter {
     // Keep reference to ship first because all is based on its movements
     this.ship = new Ship({
       parent: _this,
-      color: false
+      color: false //"0xff0000"
     });
+    this.bulletManager = new BulletManager({
+      parent: _this,
+      initialBullets: 10
+    });
+
+    this.spaceShips=[];
+    this.spaceShips.push(this.ship);
 
     //Add the background
     this.stage.background = new BackGround({
@@ -84,9 +92,6 @@ module.exports = class Game extends EventEmitter {
     });
     this.components.push(this.ground);
 
-    // Add ship last to draw it on top
-    this.components.push(this.ship);
-
     // On the next frame, the show begins
     requestAnimationFrame(this._tick.bind(this));
   }
@@ -101,9 +106,15 @@ module.exports = class Game extends EventEmitter {
    * @returns {void}
    */
   _tick(currentTime) {
+
+    // update game background components
     for (var i = 0; i < this.components.length; i++) {
       this.components[i].update(currentTime - this._lastFrameTime, currentTime);
     }
+
+    // notify objects of the impeding update.
+    this.emit( 'update', currentTime - this._lastFrameTime, currentTime );
+
     //console.log(this._lastFrameTime);
 
     // store the time

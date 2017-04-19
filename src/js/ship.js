@@ -4,6 +4,7 @@ const Bump = require('./collision');
 const bump = new Bump();
 
 module.exports = class Ship {
+
   roundPrec(num, dec) {
     var precise = Math.pow(10, dec);
     return Math.round(num * precise) / precise;
@@ -19,6 +20,9 @@ module.exports = class Ship {
 
     // user defined properties
     this._game = config.parent;
+
+    this._game.on( 'update', this.update.bind( this ) );
+
     this.stage = config.parent.stage;
     this.renderer = config.parent.renderer;
     this.shipColor = config.color || false;
@@ -26,12 +30,16 @@ module.exports = class Ship {
     this.xOffset = config.xOffset || Math.floor(this.renderer.width / 2);
     this.yOffset = config.yOffset || Math.floor(this.renderer.height / 4);
     this.depth = 1;
+    this.MAX_HEALTH = this.health = config.health || 100;
     this.acceleration = 2 / 100;
     this.maxSpeed = 30;
     this.dx = 5 / 20;
     this.dy = 5 / 20;
 
     this.state = 1; // -1 boom - 1 start - other number for other animations
+    this._timeLastBulletFired = 0;
+    // Time that passes between shots
+    this.FIRE_INTERVAL = 500;
 
     //ship size and position in sprite sheet
     this.sprites = {
@@ -76,6 +84,12 @@ module.exports = class Ship {
     //Tell the texture to use that rectangular section
     this.texture.frame = this.Rect.vertical;
 
+    //Text
+    this.textStyle = { fontSize: 14, fontFamily: 'Arial', fill: 'rgb(0,255,0)', align : 'center' };
+    this.text = new PIXI.Text( "My Ship", this.textStyle );
+    this.text.x = 5;
+    this.text.y = 5;
+
     //Create the ship from the texture
     this._ship = new PIXI.Sprite(this.texture);
     this._ship.anchor = new PIXI.Point(0.5, 0.5);
@@ -98,6 +112,44 @@ module.exports = class Ship {
     this.vy = Math.random() * 2 + 1;
   }
 
+  updateTextStyle(){
+    var f = ( this.health / this.MAX_HEALTH );
+    var g = Math.floor(f * 255);
+    var r = Math.floor( ( 1 - f ) * 255 );
+
+    this.textStyle.fill = `rgb(${r}, ${g}, 0)`;
+    this.text.style = this.textStyle;
+  }
+
+  /**
+   * Check if the spaceship was hit by a bullet
+   *
+   * @param   {PIXI.Point} bulletPosition
+   *
+   * @public
+   * @returns {Boolean} wasHit
+   */
+  checkHit( bulletPosition ) {
+    if( this._ship.containsPoint( bulletPosition ) ) {
+      // Ok, we're hit. Flash red
+      this._ship.tint = 0xFF0000;
+      this.hitHighlightStart = performance.now();
+
+      // Remove decrement health by 1
+      this.health--;
+
+      if( this.health <= 0 ) {
+        // oh dear, we're dead
+        this.state=-1;
+      } else {
+        // still alive, but taken some damage. Update text color from green to red
+        this.updateTextStyle();
+      }
+      return true;
+    }
+    return false;
+  }
+
   accelerateX(more, dt, t) {
     //manage ship speed and position
     var posMargin = 2 * this.instability;
@@ -118,19 +170,26 @@ module.exports = class Ship {
     }
   }
 
-  catchControl(dt, t) {
+  catchControl(dt, currentTime) {
     //Capture the keyboard arrow keys
-    if (control.isDown(control.UP)) {
-      this.accelerateY(false, dt, t);
+    if (control.isDown(control.UP) || control.isDown(control.UP2)) {
+      this.accelerateY(false, dt, currentTime);
     }
-    if (control.isDown(control.LEFT)) {
-      this.accelerateX(false, dt, t);
+    if (control.isDown(control.LEFT) || control.isDown(control.LEFT2)) {
+      this.accelerateX(false, dt, currentTime);
     }
-    if (control.isDown(control.DOWN)) {
-      this.accelerateY(true, dt, t);
+    if (control.isDown(control.DOWN) || control.isDown(control.DOWN2)) {
+      this.accelerateY(true, dt, currentTime);
     }
-    if (control.isDown(control.RIGHT)) {
-      this.accelerateX(true, dt, t);
+    if (control.isDown(control.RIGHT) || control.isDown(control.RIGHT2)) {
+      this.accelerateX(true, dt, currentTime);
+    }
+    if (control.isDown(control.SPACE)) {
+      if(currentTime > this._timeLastBulletFired + this.FIRE_INTERVAL ) {
+        //shooting a bullet
+        this._game.bulletManager.add(this._ship.x, this._ship.y, this.vx, this._ship);
+        this._timeLastBulletFired = currentTime;
+      }
     }
   }
 
@@ -193,6 +252,8 @@ module.exports = class Ship {
     this.updateState();
 
     if (this.state == -1) {
+      this.health--;
+      this.updateTextStyle();
       this.updateExplosion();
     } else {
       this.catchControl(dt, t);
@@ -233,6 +294,9 @@ module.exports = class Ship {
     if (this.state == -1) {
       this.drawExplosion(dt,t);
     } else if (this.state != -1) {
+      if (this.shipColor) {
+        ship.tint = this.shipColor;
+      }
       //make the ship move a little
       ship.x += Math.sin(this.count * 5) * this.instability + this.vx;
       ship.y += Math.cos(this.count * 3) * this.instability;
@@ -248,6 +312,6 @@ module.exports = class Ship {
       });
     debugText.x = ship.x - 140;
     debugText.y = ship.y + 60;
-    this.stage.addChild(ship);
+    this.stage.addChild(ship,this.text);
   }
 }
