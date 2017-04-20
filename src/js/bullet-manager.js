@@ -9,8 +9,8 @@ module.exports = class BulletManager {
     this._activeBullets = [];
     this._passiveBullets = [];
     this.texture = (config.texture || PIXI.utils.TextureCache["bullets"]);
-    this.texture.frame = new PIXI.Rectangle(204,
-      110,
+    this.texture.frame = new PIXI.Rectangle(309,
+      263,
       16,
       16);
     for (var i = 0; i < config.initialBullets; i++) {
@@ -24,7 +24,7 @@ module.exports = class BulletManager {
     }
 
     var bullet = this._passiveBullets.pop();
-    bullet.tint = spaceShip.tint;
+    bullet.tint = spaceShip._ship.tint;
     bullet.position.x = x;
     bullet.position.y = y;
     bullet.rotation = (shipSpeedDirection>=0) ? Math.PI/2 : -1*Math.PI/2;
@@ -55,9 +55,6 @@ module.exports = class BulletManager {
           if (this._game.spaceShips[s].checkHit(bullet.position)) {
             this.recycleBullet(bullet, i);
             continue;
-          } else {
-            //drawing bullet
-            this._game.stage.addChild(bullet);
           }
         }
       }
@@ -81,5 +78,7 @@ module.exports = class BulletManager {
     bullet.anchor.y = 0.5;
     bullet.rotation = 0;
     this._passiveBullets.push(bullet);
+    //drawing bullet
+    this._game.stage.addChild(bullet);
   }
 }

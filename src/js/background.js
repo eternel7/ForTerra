@@ -23,16 +23,12 @@ module.exports = class Background {
 
     this.sky.width = this.renderer.width;
     this.sky.height = this.renderer.height * 5;
+    this.stage.addChild(this.sky, this.bg);
   }
 
   update() {
-    this.draw();
-  }
-
-  draw() {
     this.xOffset += this.depth * this.ship.vx;
     this.bg.tilePosition.x = 0 - this.xOffset;
     this.bg.tilePosition.y = 0;
-    this.stage.addChild(this.sky, this.bg);
   }
 }

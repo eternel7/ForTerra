@@ -53,6 +53,11 @@ module.exports = class Game extends EventEmitter {
     //cache game var for use inside sub-objects
     var _this = this;
 
+    //Add the background
+    this.stage.background = new BackGround({
+      parent: _this
+    });
+
     // Keep reference to ship first because all is based on its movements
     this.ship = new Ship({
       parent: _this,
@@ -62,16 +67,12 @@ module.exports = class Game extends EventEmitter {
       parent: _this,
       initialBullets: 10
     });
-
     this.spaceShips=[];
     this.spaceShips.push(this.ship);
-
-    //Add the background
-    this.stage.background = new BackGround({
-      parent: _this
-    });
+    /*
     this.components.push(this.stage.background);
-
+    */
+/*
     //add the stage sets
     this.components.push(new StageSet({
       equation: function (x) {
@@ -91,7 +92,7 @@ module.exports = class Game extends EventEmitter {
       yOffset: Math.round(_this.renderer.height / 2 + 100)
     });
     this.components.push(this.ground);
-
+*/
     // On the next frame, the show begins
     requestAnimationFrame(this._tick.bind(this));
   }
@@ -106,12 +107,12 @@ module.exports = class Game extends EventEmitter {
    * @returns {void}
    */
   _tick(currentTime) {
-
+/*
     // update game background components
     for (var i = 0; i < this.components.length; i++) {
       this.components[i].update(currentTime - this._lastFrameTime, currentTime);
     }
-
+*/
     // notify objects of the impeding update.
     this.emit( 'update', currentTime - this._lastFrameTime, currentTime );
 
