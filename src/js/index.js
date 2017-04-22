@@ -56,7 +56,9 @@ PIXI.loader.add([
   {name: 'explosion30', url: 'static/resources/images/explosions/images/explosion/expl_06_0029.png'},
   {name: 'explosion31', url: 'static/resources/images/explosions/images/explosion/expl_06_0030.png'},
   {name: 'explosion32', url: 'static/resources/images/explosions/images/explosion/expl_06_0031.png'},
-  {name: 'bullets', url: 'static/resources/images/shoots/beams.png'}
+  {name: 'bullets', url: 'static/resources/images/shoots/beams.png'},
+  {name: 'floreSpritesheet', url: 'static/resources/images/flore/flore.json'},
+
 ])
   .on("progress", loadProgressHandler.bind(this))
   .load(setup)

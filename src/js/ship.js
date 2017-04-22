@@ -26,17 +26,20 @@ module.exports = class Ship {
     this.yOffset = config.yOffset || Math.floor(this.renderer.height / 4);
     this.depth = 1;
     this.MAX_HEALTH = this.health = config.health || 100;
+
     this.accelerationX = 5 / 1000;
     this.accelerationY = 1 / 1000;
-    this.maxSpeedX = 3;
-    this.maxSpeedY = 1;
+    // Time that passes between acceleration
     this.dx = 6 / 20;
     this.dy = 6 / 20;
+    this.maxSpeedX = 3;
+    this.maxSpeedY = 1;
 
     this.state = 1; // -1 boom - 1 start - other number for other animations
     this._timeLastBulletFired = 0;
     // Time that passes between shots
     this.FIRE_INTERVAL = 500;
+    this.HIGHLIGHT_INTERVAL = 100;
 
     //ship size and position in sprite sheet
     this.sprites = {
@@ -100,8 +103,16 @@ module.exports = class Ship {
     //manage explosion animation
     this.explosions = [];
     this.explosionSteps = 31;
-    for (var i = 0; i <= this.explosionSteps; i++) {
-      this.explosions.push(new PIXI.Sprite(PIXI.utils.TextureCache["explosion" + this.pad(i, 2, '0')]));
+    for (var i = 1; i < this.explosionSteps+1; i++) {
+      var explosionFrame = new PIXI.Sprite(PIXI.utils.TextureCache["explosion" + this.pad(i, 2, '0')]);
+      explosionFrame.position.x = -50;
+      explosionFrame.position.y = -50;
+      explosionFrame.anchor.x = 0.5;
+      explosionFrame.anchor.y = 0.5;
+      explosionFrame.rotation = 0;
+      this.explosions.push(explosionFrame);
+      //drawing bullet
+      this._game.stage.addChild(explosionFrame);
     }
     // create a random instability for the ship between 1 - 5
     this.instability = (1 + Math.random() * 5);
@@ -134,7 +145,7 @@ module.exports = class Ship {
       this.hitHighlightStart = performance.now();
 
       // Remove decrement health by 1
-      this.health--;
+      this.health-=10;
 
       if (this.health <= 0) {
         // oh dear, we're dead
@@ -217,49 +228,45 @@ module.exports = class Ship {
     return false;
   }
 
-  updateExplosion() {
+  updateExplosion(dt, t) {
     if (this.vx != 0) {
       var direction = Math.round(Math.abs(this.vx) / this.vx);
-      this.vx = direction * Math.max(0, Math.abs(this.vx) - 1 * this.acceleration * 100);
+      this.vx = direction * Math.max(0, Math.abs(this.vx) - 1 * this.accelerationX * 100);
     }
-    //this.xOffset = Math.max( Math.floor(this.renderer.width / 2), this.xOffset - 1);
-  }
+    this.vy=0;
 
-  drawExplosion(dt, t) {
-    var ship = this._ship;
-    var explosionSpeed = 4;
-    var explosionStep = Math.floor((this.stateStep * explosionSpeed) / dt) + 1;
+    var explosionSpeed = 0.4;
+    var explosionStep = Math.max(Math.floor((this.stateStep * explosionSpeed) / dt) + 1,this.explosionSteps);
     if (explosionStep <= this.explosionSteps) {
       this._ship = this.explosions[explosionStep];
-      if (this._game.ground) {
-        var ground = this._game.ground;
-        ship.y = Math.max(ship.y - 1, ground.equation(ship.x + ground.xOffset) + ground.yOffset);
-      }
     } else {
       this._ship = this.explosions[this.explosionSteps];
-      this._ship.anchor = new PIXI.Point(0.5, 0.5);
     }
   }
 
-  updateState() {
+  updateState(dt, currentTime) {
     //test collision
     if (this.state != -1 && this.testCollision()) {
       this.state = -1;
       this.stateStep = 0;
     }
     this.stateStep = this.stateStep + 1 || 0;
+    if (isNaN(this.hitHighlightStart) == false && currentTime > this.hitHighlightStart + this.HIGHLIGHT_INTERVAL) {
+      this._ship.tint = 16777215;
+      this.hitHighlightStart = false;
+    }
   }
 
   update(dt, t) {
     // make the ship move a little
     this.count += 0.01;
+    this.text.text = "Health :" + this.health +
+      " Speed " + this.vx.toPrecision(5);
 
-    this.updateState();
-
+    this.updateState(dt, t);
     if (this.state == -1) {
-      this.health--;
-      this.updateTextStyle();
-      this.updateExplosion();
+      this.health = 0;
+      this.updateExplosion(dt, t);
     } else {
       this.catchControl(dt, t);
       //update texture for animation of the turn in speed
@@ -280,26 +287,22 @@ module.exports = class Ship {
       this._ship.texture = this.texture;
       this._ship.position.x = this.xOffset;
       this._ship.position.y = this.yOffset;
-      if (this.state == -1) {
-        this.drawExplosion(dt, t);
-      } else if (this.state != -1) {
-        if (this.shipColor) {
-          this._ship.tint = this.shipColor;
-        }
-        //make the ship move a little
-        this._ship.position.x += Math.sin(this.count * 5) * this.instability;
-        this._ship.position.y += Math.cos(this.count * 5) * this.instability;
+      if (this.shipColor) {
+        this._ship.tint = this.shipColor;
       }
-
-      //ship orientation
-      if (this.vx < 0 && this._ship.scale.x < 0) {
-        this._ship.scale.x = 1;
-      } else {
-        if (this.vx >= 0 && this._ship.scale.x > 0) {
-          this._ship.scale.x = -1;
-        }
-      }
+      //make the ship move a little
+      this._ship.position.x += Math.sin(this.count * 5) * this.instability;
+      this._ship.position.y += Math.cos(this.count * 5) * this.instability;
     }
 
+    //ship orientation
+    if (this.vx < 0 && this._ship.scale.x < 0) {
+      this._ship.scale.x = 1;
+    } else {
+      if (this.vx >= 0 && this._ship.scale.x > 0) {
+        this._ship.scale.x = -1;
+      }
+    }
+    this.updateTextStyle();
   }
 }
