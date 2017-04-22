@@ -26,10 +26,12 @@ module.exports = class Ship {
     this.yOffset = config.yOffset || Math.floor(this.renderer.height / 4);
     this.depth = 1;
     this.MAX_HEALTH = this.health = config.health || 100;
-    this.acceleration = 2 / 100;
-    this.maxSpeed = 30;
-    this.dx = 5 / 20;
-    this.dy = 5 / 20;
+    this.accelerationX = 5 / 1000;
+    this.accelerationY = 1 / 1000;
+    this.maxSpeedX = 3;
+    this.maxSpeedY = 1;
+    this.dx = 6 / 20;
+    this.dy = 6 / 20;
 
     this.state = 1; // -1 boom - 1 start - other number for other animations
     this._timeLastBulletFired = 0;
@@ -103,10 +105,8 @@ module.exports = class Ship {
     }
     // create a random instability for the ship between 1 - 5
     this.instability = (1 + Math.random() * 5);
-
-    // create a random speed for the ship between 1 - 3
     this.vx = 0;
-    this.vy = Math.random() * 2 + 1;
+    this.vy = 0;
 
     this.stage.addChild(this._ship, this.text);
   }
@@ -153,18 +153,20 @@ module.exports = class Ship {
     var posMargin = 2 * this.instability;
     if (more === true) {
       this.xOffset = Math.min(this.xOffset + this.dx * dt, this.renderer.width - posMargin - 2 * this.sprites.horizontal.w);
-      this.vx = Math.min(this.vx + this.acceleration * dt, this.maxSpeed);
+      this.vx = Math.min(this.vx + this.accelerationX * dt, this.maxSpeedX);
     } else {
       this.xOffset = Math.max(this.xOffset - this.dy * dt, posMargin + 2 * this.sprites.horizontal.w);
-      this.vx = Math.max(this.vx - this.acceleration * dt, -1 * this.maxSpeed);
+      this.vx = Math.max(this.vx - this.accelerationX * dt, -1 * this.maxSpeedX);
     }
   }
 
   accelerateY(more, dt, t) {
     if (more === true) {
       this.yOffset = Math.min(this.yOffset + this.dy * dt, this.renderer.height - this.sprites.horizontal.h);
+      this.vy = Math.min(this.vy + this.accelerationY * dt, this.maxSpeedY);
     } else {
       this.yOffset = Math.max(this.yOffset - this.dy * dt, 0);
+      this.vy = Math.max(this.vy - this.accelerationY * dt, -1 * this.maxSpeedY);
     }
   }
 

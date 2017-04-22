@@ -69,30 +69,7 @@ module.exports = class Game extends EventEmitter {
     });
     this.spaceShips=[];
     this.spaceShips.push(this.ship);
-    /*
-    this.components.push(this.stage.background);
-    */
-/*
-    //add the stage sets
-    this.components.push(new StageSet({
-      equation: function (x) {
-        return 30 * Math.sin(x / 50) + Math.cos(x / 100);
-      },
-      parent: _this,
-      depth: 0.3,
-      color: "0x002200"
-    }));
-    this.ground = new StageSet({
-      equation: function (x) {
-        return 25 * Math.cos(x / 100) + 50 * Math.sin(x / 5000);
-      },
-      parent: _this,
-      depth: 1,
-      color: "0x003300",
-      yOffset: Math.round(_this.renderer.height / 2 + 100)
-    });
-    this.components.push(this.ground);
-*/
+
     // On the next frame, the show begins
     requestAnimationFrame(this._tick.bind(this));
   }
@@ -107,16 +84,8 @@ module.exports = class Game extends EventEmitter {
    * @returns {void}
    */
   _tick(currentTime) {
-/*
-    // update game background components
-    for (var i = 0; i < this.components.length; i++) {
-      this.components[i].update(currentTime - this._lastFrameTime, currentTime);
-    }
-*/
     // notify objects of the impeding update.
     this.emit( 'update', currentTime - this._lastFrameTime, currentTime );
-
-    //console.log(this._lastFrameTime);
 
     // store the time
     this._lastFrameTime = currentTime;

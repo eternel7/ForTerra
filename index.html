@@ -10,7 +10,8 @@
             margin: 0px;
             padding: 0px;
             overflow: hidden;
-            // make sure no scrollbar
+            /* make sure no scrollbar */
+            background-color: #000000;
         }
     </style>
     <link rel="manifest" href="manifest.json">
@@ -18,10 +19,10 @@
     <script>
       if (navigator.serviceWorker) {
         navigator.serviceWorker.register('static/js/service-worker.js')
-          .then(function(){
+          .then(function () {
             console.log('service worker installed');
           })
-          .catch(function(err){
+          .catch(function (err) {
             console.log('Error', err);
           });
       }
