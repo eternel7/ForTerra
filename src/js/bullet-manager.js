@@ -52,7 +52,7 @@ module.exports = class BulletManager {
           if (this._game.spaceShips[s] === bullet.source) {
             continue;
           }
-          if (this._game.spaceShips[s].checkHit(bullet.position)) {
+          if (this._game.spaceShips[s].checkHit(bullet.position,bullet.damage)) {
             this.recycleBullet(bullet, i);
             continue;
           }
@@ -77,6 +77,7 @@ module.exports = class BulletManager {
     bullet.anchor.x = 0.5;
     bullet.anchor.y = 0.5;
     bullet.rotation = 0;
+    bullet.damage = 5;
     this._passiveBullets.push(bullet);
     //drawing bullet
     this._game.stage.addChild(bullet);

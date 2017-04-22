@@ -38,7 +38,7 @@ module.exports = class Background {
       depth: 0.01,
       hittingBox: false
     });
-    //ground
+    //TODO : add a ground
 
     //flore on the ground
     var flore = PIXI.loader.resources["floreSpritesheet"];
@@ -53,7 +53,8 @@ module.exports = class Background {
         x: palm.position.x,
         y: palm.position.y
       },
-      hittingBox: true
+      hittingBox: true,
+      damage: 10
     });
     this.stage.addChild(this.sky, this.bg, palm);
   }
@@ -74,7 +75,7 @@ module.exports = class Background {
       }
       if (el.hittingBox == true) {
         for (var s = 0; s < this._game.spaceShips.length; s++) {
-          this._game.spaceShips[s].checkHit(el.sprite.position);
+          this._game.spaceShips[s].checkHit(el.sprite.position, el.damage);
         }
       }
     }
