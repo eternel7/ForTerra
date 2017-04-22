@@ -97,17 +97,17 @@ module.exports = class Ship {
     //Life bar UI
     this.lifeBarContainer = new PIXI.Container();
     this.lifeBarTexture = PIXI.utils.TextureCache["UIBar01"];
-    this.lifeBarTexture.frame = new PIXI.Rectangle(61, 128, 270, 80);
+    this.lifeBarTexture.frame = new PIXI.Rectangle(61, 128, 270, 79);
     this.lifeBar = new PIXI.Sprite(this.lifeBarTexture);
-    this.lifeBar.x = 5;
-    this.lifeBar.y = 5;
     this.lifeBar.scale.set(0.5);
     this.lifeBarGauge = new PIXI.Graphics();
     this.lifeBarContainer.addChild(this.lifeBarGauge);
     this.lifeBarContainer.addChild(this.lifeBar);
     this.lifeBarGauge.beginFill(0x00FF00);
     // draw a rectangle
-    this.lifeBarGauge.drawRect(28, 20, 92, 22);
+    this.lifeBarGauge.drawRect(23, 14, 92, 24);
+    this.lifeBarContainer.x = Math.round((this._game.renderer.width - this.lifeBarContainer.width)/2);
+    this.lifeBarContainer.y = this._game.renderer.height - this.lifeBarContainer.height - 5;
 
     //manage explosion animation
     this.explosions = [];
@@ -133,7 +133,7 @@ module.exports = class Ship {
       var r = Math.floor(( 1 - f ) * 255);
       this.lifeBarGauge.beginFill("0x" + r.toString(16) + g.toString(16) + "00");
       // draw a rectangle
-      this.lifeBarGauge.drawRect(28, 20, Math.floor(92 * f), 22);
+      this.lifeBarGauge.drawRect(23, 14, Math.floor(92 * f), 24);
     }
   }
 
