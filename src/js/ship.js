@@ -84,12 +84,6 @@ module.exports = class Ship {
     //Tell the texture to use that rectangular section
     this.texture.frame = this.Rect.vertical;
 
-    //Text
-    this.textStyle = {fontSize: 14, fontFamily: 'Arial', fill: 'rgb(0,255,0)', align: 'center'};
-    this.text = new PIXI.Text("My Ship", this.textStyle);
-    this.text.x = 5;
-    this.text.y = 5;
-
     //Create the ship from the texture
     this._ship = new PIXI.Sprite(this.texture);
     this._ship.anchor = new PIXI.Point(0.5, 0.5);
@@ -100,27 +94,47 @@ module.exports = class Ship {
       this._ship.tint = this.shipColor;
     }
 
+    //Life bar UI
+    this.lifeBarContainer = new PIXI.Container();
+    this.lifeBarTexture = PIXI.utils.TextureCache["UIBar01"];
+    this.lifeBarTexture.frame = new PIXI.Rectangle(61, 128, 270, 80);
+    this.lifeBar = new PIXI.Sprite(this.lifeBarTexture);
+    this.lifeBar.x = 5;
+    this.lifeBar.y = 5;
+    this.lifeBar.scale.set(0.5);
+    this.lifeBarGauge = new PIXI.Graphics();
+    this.lifeBarContainer.addChild(this.lifeBarGauge);
+    this.lifeBarContainer.addChild(this.lifeBar);
+    this.lifeBarGauge.beginFill(0x00FF00);
+    // draw a rectangle
+    this.lifeBarGauge.drawRect(28, 20, 92, 22);
+
     //manage explosion animation
     this.explosions = [];
     this.explosionSteps = 31;
     for (var i = 0; i <= this.explosionSteps; i++) {
-      this.explosions.push(PIXI.utils.TextureCache["expl_06_00" + this.pad(i, 2, '0')+".png"]);
+      this.explosions.push(PIXI.utils.TextureCache["expl_06_00" + this.pad(i, 2, '0') + ".png"]);
     }
+    this.explosion = new PIXI.extras.AnimatedSprite(this.explosions);
 
     // create a random instability for the ship between 1 - 5
     this.instability = (1 + Math.random() * 5);
     this.vx = 0;
     this.vy = 0;
 
-    this.stage.addChild(this._ship, this.text);
+    this.stage.addChild(this._ship, this.lifeBarContainer);
   }
 
-  updateTextStyle() {
-    var f = ( this.health / this.MAX_HEALTH );
-    var g = Math.floor(f * 255);
-    var r = Math.floor(( 1 - f ) * 255);
-    this.textStyle.fill = `rgb(${r}, ${g}, 0)`;
-    this.text.style = this.textStyle;
+  updateLifeBarStyle() {
+    this.lifeBarGauge.clear();
+    if (this.health > 0) {
+      var f = ( this.health / this.MAX_HEALTH );
+      var g = Math.floor(f * 255);
+      var r = Math.floor(( 1 - f ) * 255);
+      this.lifeBarGauge.beginFill("0x" + r.toString(16) + g.toString(16) + "00");
+      // draw a rectangle
+      this.lifeBarGauge.drawRect(28, 20, Math.floor(92 * f), 22);
+    }
   }
 
   /**
@@ -160,9 +174,10 @@ module.exports = class Ship {
         this.explosion.loop = false;
         this._game.stage.addChild(this.explosion);
         this.explosion.play();
+        this.updateLifeBarStyle();
       } else {
         // still alive, but taken some damage. Update text color from green to red
-        this.updateTextStyle();
+        this.updateLifeBarStyle();
       }
       return true;
     }
@@ -218,7 +233,6 @@ module.exports = class Ship {
   update(dt, currentTime) {
     // make the ship move a little
     this.count += 0.01;
-    this.text.text = "Health :" + this.health + " Speed " + this.vx.toPrecision(5);
     if (isNaN(this.hitHighlightStart) == false && currentTime > this.hitHighlightStart + this.HIGHLIGHT_INTERVAL) {
       this._ship.tint = 16777215;
       this.hitHighlightStart = false;

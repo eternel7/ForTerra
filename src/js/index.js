@@ -25,6 +25,7 @@ PIXI.loader.add([
   {name: 'skySpritesheet', url: 'static/resources/images/backgrounds/sky/sky.json'},
   {name: "background", url: "static/resources/images/backgrounds/stars_white.png"},
   {name: 'floreSpritesheet', url: 'static/resources/images/flore/flore.json'},
+  {name: "UIBar01", url: "static/resources/images/backgrounds/UIBar01.png"},
   {name: "ships", url: "static/resources/images/ships/wc2ships_sheet.png"},
   {name: 'bullets', url: 'static/resources/images/shoots/beams.png'},
 
