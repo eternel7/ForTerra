@@ -103,10 +103,9 @@ module.exports = class Ship {
     //manage explosion animation
     this.explosions = [];
     this.explosionSteps = 31;
-    for (var i = 1; i < this.explosionSteps + 1; i++) {
-      this.explosions.push(PIXI.utils.TextureCache["explosion" + this.pad(i, 2, '0')]);
+    for (var i = 0; i <= this.explosionSteps; i++) {
+      this.explosions.push(PIXI.utils.TextureCache["expl_06_00" + this.pad(i, 2, '0')+".png"]);
     }
-    this.explosion = new PIXI.extras.AnimatedSprite(this.explosions);
 
     // create a random instability for the ship between 1 - 5
     this.instability = (1 + Math.random() * 5);
