@@ -27,12 +27,12 @@ module.exports = class Ship {
     this.depth = 1;
     this.MAX_HEALTH = this.health = config.health || 100;
 
-    this.accelerationX = 5 / 1000;
+    this.accelerationX = 10 / 1000;
     this.accelerationY = 1 / 1000;
     // Time that passes between acceleration
-    this.dx = 6 / 20;
-    this.dy = 6 / 20;
-    this.maxSpeedX = 3;
+    this.dx = 5 / 50;
+    this.dy = 5 / 50;
+    this.maxSpeedX = 5;
     this.maxSpeedY = 1;
 
     this.state = 1; // -1 boom - 1 start - other number for other animations
@@ -99,15 +99,31 @@ module.exports = class Ship {
     this.lifeBarTexture = PIXI.utils.TextureCache["UIBar01"];
     this.lifeBarTexture.frame = new PIXI.Rectangle(61, 128, 270, 79);
     this.lifeBar = new PIXI.Sprite(this.lifeBarTexture);
-    this.lifeBar.scale.set(0.5);
+    this.lifeBar.scale.set(0.8, 0.5);
+    this.lifeBarWidthMax = 150;
+    this.lifeBarX = 33;
     this.lifeBarGauge = new PIXI.Graphics();
     this.lifeBarContainer.addChild(this.lifeBarGauge);
     this.lifeBarContainer.addChild(this.lifeBar);
     this.lifeBarGauge.beginFill(0x00FF00);
     // draw a rectangle
-    this.lifeBarGauge.drawRect(23, 14, 92, 24);
-    this.lifeBarContainer.x = Math.round((this._game.renderer.width - this.lifeBarContainer.width)/2);
-    this.lifeBarContainer.y = this._game.renderer.height - this.lifeBarContainer.height - 5;
+    this.lifeBarGauge.drawRect(this.lifeBarX, 14, this.lifeBarWidthMax, 24);
+
+    this.lifeBarTextStyle = new PIXI.TextStyle({
+      fontFamily: 'Arial',
+      fontSize: 16,
+      fontStyle: 'italic',
+      fontWeight: 'bold',
+      fill: ['#ffffff', '#00ff99'], // gradient
+      stroke: '#4a1850',
+      strokeThickness: 5
+    });
+    this.lifeBarText = new PIXI.Text(this.health + "/" + this.MAX_HEALTH, this.lifeBarTextStyle);
+    this.lifeBarText.position.x = Math.floor(this.lifeBarContainer.width / 2 - this.lifeBarText.width / 2);
+    this.lifeBarText.position.y =  Math.floor(this.lifeBarContainer.height / 2 - this.lifeBarText.height / 2) + 6;
+    this.lifeBarContainer.addChild(this.lifeBarText);
+    this.lifeBarContainer.x = Math.round((this._game.renderer.width - this.lifeBarContainer.width) / 2);
+    this.lifeBarContainer.y = this._game.renderer.height - this.lifeBarContainer.height - 15;
 
     //manage explosion animation
     this.explosions = [];
@@ -133,7 +149,12 @@ module.exports = class Ship {
       var r = Math.floor(( 1 - f ) * 255);
       this.lifeBarGauge.beginFill("0x" + r.toString(16) + g.toString(16) + "00");
       // draw a rectangle
-      this.lifeBarGauge.drawRect(23, 14, Math.floor(92 * f), 24);
+      this.lifeBarGauge.drawRect(this.lifeBarX, 14, Math.floor(this.lifeBarWidthMax * f), 24);
+      this.lifeBarTextStyle.fill = ['#ffffff', '#' + this.pad(r.toString(16), 2, '0') + this.pad(g.toString(16), 2, '0') + '00'];
+      this.lifeBarText.text = this.health + "/" + this.MAX_HEALTH;
+      this.lifeBarText.position.x = Math.floor(this.lifeBarContainer.width / 2 - this.lifeBarText.width / 2);
+    } else {
+      this.lifeBarText.text = "0/" + this.MAX_HEALTH;
     }
   }
 
@@ -147,10 +168,12 @@ module.exports = class Ship {
    */
   checkHit(hitbox, objectDamage) {
     var touched = false;
-    if (hitbox instanceof PIXI.Point || hitbox instanceof PIXI.ObservablePoint) {
-      touched = this._ship.containsPoint(hitbox);
-    } else if (hitbox instanceof PIXI.Rectangle) {
-      touched = this._ship.hitTestRectangle(hitbox);
+    if (hitbox instanceof PIXI.Graphics) {
+      touched = false;
+    } else if (hitbox.Rectangle instanceof PIXI.Rectangle) {
+      touched = this._ship.hitTestRectangle(hitbox.Rectangle);
+    } else if (hitbox.position instanceof PIXI.Point || hitbox.position instanceof PIXI.ObservablePoint) {
+      touched = this._ship.containsPoint(hitbox.position);
     }
     if (touched) {
       // Ok, we're hit. Flash red

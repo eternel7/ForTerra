@@ -24,7 +24,7 @@ module.exports = class Background {
 
     //moving backgrounds
     this.backgrounds = [];
-    var groundY = Math.round(2 * this.renderer.height / 3);
+    var groundY = Math.round(3 * this.renderer.height / 4);
 
     //stars in the sky
     var bgTexture = (config.bg && PIXI.loader.resources[config.bg].texture) || PIXI.loader.resources["background"].texture;
@@ -38,25 +38,46 @@ module.exports = class Background {
       depth: 0.01,
       hittingBox: false
     });
-    //TODO : add a ground
 
+    //TODO : add a ground
+    this.groundSrpite = new PIXI.Graphics();
+    this.ground = {
+      sprite: this.groundSrpite,
+      depth: 1,
+      hittingBox: true,
+      damage: 20,
+      subEquation: function (x) {
+        return 2 * Math.sin(x / 20) + 5 * Math.cos(x / 50);
+      },
+      equation: function (x) {
+        return this.subEquation(x) +
+          0.5 * this.subEquation(2 * x) +
+          0.25 * this.subEquation(4 * x) + groundY;
+      },
+      color: 0x116611
+    };
+
+    this.backgrounds.push(this.ground);
+    this.stage.addChild(this.sky, this.bg, this.groundSrpite);
     //flore on the ground
     var flore = PIXI.loader.resources["floreSpritesheet"];
-    var palm = new PIXI.Sprite(flore.textures["palm03.png"]);
-    palm.anchor = new PIXI.Point(0.5, 0.5);
-    palm.position.x = Math.random() * 500 + 250;
-    palm.position.y = groundY;
-    this.backgrounds.push({
-      sprite: palm,
-      depth: 0.15,
-      origin: {
-        x: palm.position.x,
-        y: palm.position.y
-      },
-      hittingBox: true,
-      damage: 10
-    });
-    this.stage.addChild(this.sky, this.bg, palm);
+    for (var i = 0; i <= 100; i++) {
+      var palm = new PIXI.Sprite(flore.textures["palm03.png"]);
+      palm.anchor = new PIXI.Point(0.5, 0.5);
+      palm.position.x = Math.random()*10000;
+      palm.position.y = this.ground.equation(palm.position.x) + Math.random()*30-10;
+      this.backgrounds.push({
+        sprite: palm,
+        depth: 1,
+        origin: {
+          x: palm.position.x,
+          y: palm.position.y
+        },
+        hittingBox: true,
+        damage: 5
+      });
+      this.stage.addChild(palm);
+    }
   }
 
   update(dt, t) {
@@ -67,15 +88,29 @@ module.exports = class Background {
       if (el.sprite instanceof PIXI.extras.TilingSprite) {
         el.sprite.tilePosition.x = 0 - el.depth * this.xPlayer;
         el.sprite.tilePosition.y = 0 - el.depth * this.yPlayer;
-      } else {
-        if (el.sprite instanceof PIXI.Sprite) {
-          el.sprite.position.x = el.origin.x - el.depth * this.xPlayer;
-          el.sprite.position.y = el.origin.y - el.depth * this.yPlayer;
+      } else if (el.sprite instanceof PIXI.Sprite) {
+        el.sprite.position.x = el.origin.x - el.depth * this.xPlayer;
+        el.sprite.position.y = el.origin.y - el.depth * this.yPlayer;
+      } else if (el.sprite instanceof PIXI.Graphics) {
+        var minX = 0;
+        var maxX = this._game.renderer.width;
+        var iteration = (maxX - minX) / 1000;
+        el.sprite.clear();
+        el.sprite.moveTo(minX, el.equation(minX + this.xPlayer * el.depth) - this.yPlayer * el.depth);
+        el.sprite.beginFill(el.color);
+        for (var x = minX + iteration; x <= maxX; x += iteration) {
+          var y = el.equation(x + this.xPlayer * el.depth);
+          el.sprite.lineTo(x, y - this.yPlayer * el.depth);
         }
+        //last points
+        el.sprite.lineTo(maxX, el.equation(maxX + this.xPlayer * el.depth) - this.yPlayer * el.depth);
+        el.sprite.lineTo(maxX, this._game.renderer.height);
+        el.sprite.lineTo(minX, this._game.renderer.height);
+        el.sprite.endFill();
       }
       if (el.hittingBox == true) {
         for (var s = 0; s < this._game.spaceShips.length; s++) {
-          this._game.spaceShips[s].checkHit(el.sprite.position, el.damage);
+          this._game.spaceShips[s].checkHit(el.sprite, el.damage);
         }
       }
     }

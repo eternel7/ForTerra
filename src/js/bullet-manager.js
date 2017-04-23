@@ -52,7 +52,7 @@ module.exports = class BulletManager {
           if (this._game.spaceShips[s] === bullet.source) {
             continue;
           }
-          if (this._game.spaceShips[s].checkHit(bullet.position,bullet.damage)) {
+          if (this._game.spaceShips[s].checkHit(bullet,bullet.damage)) {
             this.recycleBullet(bullet, i);
             continue;
           }
