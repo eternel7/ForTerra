@@ -27,12 +27,12 @@ module.exports = class Ship {
     this.depth = 1;
     this.MAX_HEALTH = this.health = config.health || 100;
 
-    this.accelerationX = 10 / 1000;
+    this.accelerationX = 2 / 1000;
     this.accelerationY = 1 / 1000;
     // Time that passes between acceleration
     this.dx = 5 / 50;
     this.dy = 5 / 50;
-    this.maxSpeedX = 5;
+    this.maxSpeedX = 3;
     this.maxSpeedY = 1;
 
     this.state = 1; // -1 boom - 1 start - other number for other animations
@@ -89,6 +89,8 @@ module.exports = class Ship {
     this._ship.anchor = new PIXI.Point(0.5, 0.5);
     this._ship.x = this.xOffset;
     this._ship.y = this.yOffset;
+    this.worldX = Math.random() * this._game.worldWidth;
+    this.worldY = this.yOffset;
 
     if (this.shipColor) {
       this._ship.tint = this.shipColor;
@@ -118,9 +120,9 @@ module.exports = class Ship {
       stroke: '#4a1850',
       strokeThickness: 5
     });
-    this.lifeBarText = new PIXI.Text(this.health + "/" + this.MAX_HEALTH, this.lifeBarTextStyle);
+    this.lifeBarText = new PIXI.Text(this.health + "/" + this.MAX_HEALTH + "        " + Math.round(this.worldX), this.lifeBarTextStyle);
     this.lifeBarText.position.x = Math.floor(this.lifeBarContainer.width / 2 - this.lifeBarText.width / 2);
-    this.lifeBarText.position.y =  Math.floor(this.lifeBarContainer.height / 2 - this.lifeBarText.height / 2) + 6;
+    this.lifeBarText.position.y = Math.floor(this.lifeBarContainer.height / 2 - this.lifeBarText.height / 2) + 6;
     this.lifeBarContainer.addChild(this.lifeBarText);
     this.lifeBarContainer.x = Math.round((this._game.renderer.width - this.lifeBarContainer.width) / 2);
     this.lifeBarContainer.y = this._game.renderer.height - this.lifeBarContainer.height - 15;
@@ -151,7 +153,7 @@ module.exports = class Ship {
       // draw a rectangle
       this.lifeBarGauge.drawRect(this.lifeBarX, 14, Math.floor(this.lifeBarWidthMax * f), 24);
       this.lifeBarTextStyle.fill = ['#ffffff', '#' + this.pad(r.toString(16), 2, '0') + this.pad(g.toString(16), 2, '0') + '00'];
-      this.lifeBarText.text = this.health + "/" + this.MAX_HEALTH;
+      this.lifeBarText.text = this.health + "/" + this.MAX_HEALTH + "        " + Math.round(this.worldX);
       this.lifeBarText.position.x = Math.floor(this.lifeBarContainer.width / 2 - this.lifeBarText.width / 2);
     } else {
       this.lifeBarText.text = "0/" + this.MAX_HEALTH;
@@ -180,8 +182,8 @@ module.exports = class Ship {
       this._ship.tint = 0xFF0000;
       this.hitHighlightStart = performance.now();
 
-      // Remove decrement health by 1
-      this.health -= objectDamage || 1;
+      // Remove decrement health by object damage
+      this.health -= objectDamage;
 
       if (this.health <= 0) {
         // oh dear, we're dead
@@ -252,7 +254,6 @@ module.exports = class Ship {
     }
   }
 
-
   update(dt, currentTime) {
     // make the ship move a little
     this.count += 0.01;
@@ -267,13 +268,13 @@ module.exports = class Ship {
     } else {
       this.catchControl(dt, currentTime);
       //update texture for animation of the turn in speed
-      if (Math.abs(this.vx) > 2.5) {
+      if (Math.abs(this.vx) > 1) {
         //Tell the texture to use that rectangular section
         this.texture.frame = this.Rect.horizontal;
-      } else if (Math.abs(this.vx) > 1.5) {
+      } else if (Math.abs(this.vx) > 0.5) {
         //Tell the texture to use that rectangular section
         this.texture.frame = this.Rect.a;
-      } else if (Math.abs(this.vx) > 0.5) {
+      } else if (Math.abs(this.vx) > 0.25) {
         //Tell the texture to use that rectangular section
         this.texture.frame = this.Rect.b;
       } else {
@@ -288,8 +289,14 @@ module.exports = class Ship {
         this._ship.tint = this.shipColor;
       }
       //make the ship move a little
+      this.gravityX = this._ship.position.x;
+      this.gravityY = this._ship.position.y;
       this._ship.position.x += Math.sin(this.count * 5) * this.instability;
       this._ship.position.y += Math.cos(this.count * 5) * this.instability;
+
+      this.worldX = this._game.mod(( this.worldX + this._game.ship.vx * dt ), this._game.worldWidth);
+      this.worldY += this._game.ship.vy * dt;
+      this.updateLifeBarStyle();
 
       //ship orientation
       if (this.vx < 0 && this._ship.scale.x < 0) {

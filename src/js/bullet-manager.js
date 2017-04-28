@@ -40,9 +40,7 @@ module.exports = class BulletManager {
       bullet.position.x += Math.sin(bullet.rotation) * this.speed;
       bullet.position.y -= Math.cos(bullet.rotation) * this.speed;
 
-      if (bullet.position.x < 0 ||
-        bullet.position.x > this._game.renderer.width ||
-        bullet.position.y < 0 ||
+      if (bullet.position.y < 0 ||
         bullet.position.y > this._game.renderer.height) {
         // Bullet has left the stage, time to recycle it
         this.recycleBullet(bullet, i);

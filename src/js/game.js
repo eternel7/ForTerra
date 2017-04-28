@@ -35,10 +35,7 @@ module.exports = class Game extends EventEmitter {
     //cache for the element we are binding the game on
     this._element = element;
 
-    // Keep a reference to the components we will update on each frame
-    this.components = [];
-
-    // Pixi creates a nested Hierarchie of DisplayObjects and Containers. The stage is just the outermost container
+    // Pixi creates a nested hierarchy of DisplayObjects and Containers. The stage is just the outermost container
     this.stage = new PIXI.Container();
 
     // We want a renderer with a transparent background - ideally a WebGL one
@@ -49,7 +46,7 @@ module.exports = class Game extends EventEmitter {
 
     // Frames are distributed unevenly - let's keep track of how much time has passed since the last one
     this._lastFrameTime = 0;
-
+    this.worldWidth = this.renderer.width * 1;
     //cache game var for use inside sub-objects
     var _this = this;
 
@@ -95,5 +92,13 @@ module.exports = class Game extends EventEmitter {
 
     // and schedule the next tick
     requestAnimationFrame(this._tick.bind(this));
+  }
+
+  mod(a, b) {
+    var ret = a % b;
+    if (ret < 0) {
+      ret += b;
+    }
+    return ret;
   }
 }

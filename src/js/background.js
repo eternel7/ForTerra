@@ -11,9 +11,6 @@ module.exports = class Background {
     this.stage = config.parent.stage;
     this.renderer = config.parent.renderer;
     this.setColor = config.color;
-    //position of player in the world
-    this.xPlayer = config.xPlayer || 0;
-    this.yPlayer = config.yPlayer || 0;
 
     //Static background
     var skies = PIXI.loader.resources["skySpritesheet"].textures;
@@ -54,18 +51,18 @@ module.exports = class Background {
           0.5 * this.subEquation(2 * x) +
           0.25 * this.subEquation(4 * x) + groundY;
       },
-      color: 0x116611
+      color: 0xaca31e
     };
 
     this.backgrounds.push(this.ground);
     this.stage.addChild(this.sky, this.bg, this.groundSrpite);
     //flore on the ground
     var flore = PIXI.loader.resources["floreSpritesheet"];
-    for (var i = 0; i <= 100; i++) {
+    for (var i = 0; i <= 10; i++) {
       var palm = new PIXI.Sprite(flore.textures["palm03.png"]);
       palm.anchor = new PIXI.Point(0.5, 0.5);
-      palm.position.x = Math.random()*10000;
-      palm.position.y = this.ground.equation(palm.position.x) + Math.random()*30-10;
+      palm.position.x = Math.random() * this._game.worldWidth;
+      palm.position.y = this.ground.equation(palm.position.x) + Math.random() * 100 - 10;
       this.backgrounds.push({
         sprite: palm,
         depth: 1,
@@ -74,36 +71,42 @@ module.exports = class Background {
           y: palm.position.y
         },
         hittingBox: true,
-        damage: 5
+        damage: 0
       });
       this.stage.addChild(palm);
     }
   }
 
+  xStaticSprite(el) {
+    var ship = this._game.ship;
+    //World is round sprite can be be nearer left or right
+    return this._game.mod(el.origin.x - el.depth * ship.worldX,this._game.worldWidth);
+  }
+
   update(dt, t) {
-    this.xPlayer += this._game.ship.vx * dt;
-    this.yPlayer += this._game.ship.vy * dt;
+    var ship = this._game.ship;
+    var minX = 0;
+    var maxX = this._game.renderer.width;
+
     for (var i = 0; i < this.backgrounds.length; i++) {
       var el = this.backgrounds[i];
       if (el.sprite instanceof PIXI.extras.TilingSprite) {
-        el.sprite.tilePosition.x = 0 - el.depth * this.xPlayer;
-        el.sprite.tilePosition.y = 0 - el.depth * this.yPlayer;
+        el.sprite.tilePosition.x = 0 - el.depth * ship.worldX;
+        el.sprite.tilePosition.y = 0 - el.depth * ship.worldY;
       } else if (el.sprite instanceof PIXI.Sprite) {
-        el.sprite.position.x = el.origin.x - el.depth * this.xPlayer;
-        el.sprite.position.y = el.origin.y - el.depth * this.yPlayer;
+        el.sprite.position.x = this.xStaticSprite(el);
+        el.sprite.position.y = el.origin.y - el.depth * ship.worldY;
       } else if (el.sprite instanceof PIXI.Graphics) {
-        var minX = 0;
-        var maxX = this._game.renderer.width;
-        var iteration = (maxX - minX) / 1000;
         el.sprite.clear();
-        el.sprite.moveTo(minX, el.equation(minX + this.xPlayer * el.depth) - this.yPlayer * el.depth);
+        el.sprite.moveTo(minX, el.equation(minX + ship.worldX * el.depth) - ship.worldY * el.depth);
         el.sprite.beginFill(el.color);
+        var iteration = (maxX - minX) / 1000;
         for (var x = minX + iteration; x <= maxX; x += iteration) {
-          var y = el.equation(x + this.xPlayer * el.depth);
-          el.sprite.lineTo(x, y - this.yPlayer * el.depth);
+          var y = el.equation(x + ship.worldX * el.depth);
+          el.sprite.lineTo(x, y - ship.worldY * el.depth);
         }
         //last points
-        el.sprite.lineTo(maxX, el.equation(maxX + this.xPlayer * el.depth) - this.yPlayer * el.depth);
+        el.sprite.lineTo(maxX, el.equation(maxX + ship.worldX * el.depth) - ship.worldY * el.depth);
         el.sprite.lineTo(maxX, this._game.renderer.height);
         el.sprite.lineTo(minX, this._game.renderer.height);
         el.sprite.endFill();
