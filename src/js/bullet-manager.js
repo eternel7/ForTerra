@@ -28,22 +28,29 @@ module.exports = class BulletManager {
     bullet.worldX = spaceShip.worldX;
     bullet.worldY = spaceShip.worldY;
     bullet.distX = 0;
-    bullet.maxDist = spaceShip.weaponMaxDist || 3500;
-    bullet.speed = spaceShip.weaponSpeed || 3 ;
+    bullet.maxDist = spaceShip.weaponMaxDist || 100000;
+    bullet.duration = 0;
+    bullet.maxDuration = spaceShip.weaponmaxDuration || 7000; //in milliseconds
+    bullet.friction = spaceShip.weaponFriction || 0.001;
+    bullet.normalSpeed = spaceShip.weaponSpeed || 0.5;
+    bullet.speed = bullet.normalSpeed + spaceShip.vx;
     bullet.damage = spaceShip.weaponDamage || 5;
     bullet.rotation = (shipSpeedDirection >= 0) ? Math.PI / 2 : -1 * Math.PI / 2;
     bullet.source = spaceShip;
     this._activeBullets.push(bullet);
   }
 
-  update(dt,t) {
+  update(dt, t) {
     var i, s, bullet;
 
     for (i = 0; i < this._activeBullets.length; i++) {
       bullet = this._activeBullets[i];
+      bullet.speed = Math.max(bullet.speed - bullet.friction, bullet.normalSpeed);
       let distX = Math.sin(bullet.rotation) * bullet.speed * dt;
       bullet.distX += Math.abs(distX);
-      if (bullet.distX > bullet.maxDist) {
+      bullet.duration += dt;
+      if (bullet.distX > bullet.maxDist ||
+        bullet.duration > bullet.maxDuration) {
         // Bullet made the max distance it could, time to recycle it
         this.recycleBullet(bullet, i);
       } else {

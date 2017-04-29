@@ -60,7 +60,7 @@ module.exports = class Background {
     //Static sprites
     //Flore on the ground
     const flore = PIXI.loader.resources["floreSpritesheet"];
-    for (let i = 0; i <= 10; i++) {
+    for (let i = 0; i <= 50; i++) {
       let palm = new PIXI.Sprite(flore.textures["palm03.png"]);
       palm.anchor = new PIXI.Point(0.5, 0.5);
       palm.position.x = Math.random() * this._game.worldWidth;
