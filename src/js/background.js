@@ -42,7 +42,7 @@ module.exports = class Background {
       sprite: this.groundSrpite,
       depth: 1,
       hittingBox: true,
-      damage: 20,
+      damage: 50,
       subEquation: function (x) {
         return 2 * Math.sin(x / 20) + 5 * Math.cos(x / 50);
       },
@@ -65,13 +65,27 @@ module.exports = class Background {
       palm.anchor = new PIXI.Point(0.5, 0.5);
       palm.position.x = Math.random() * this._game.worldWidth;
       palm.position.y = this.ground.equation(palm.position.x) + Math.random() * 100 - 10;
+      //draw hitbox for debug
+      let hitbox = new PIXI.Graphics();
+      hitbox.anchor = new PIXI.Point(0.5, 0.5);
+      hitbox.lineStyle(1, 0xa0ee00, 1);
       this.backgrounds.push({
         sprite: palm,
         depth: 1,
         worldX: palm.position.x,
         worldY: palm.position.y,
-        hittingBox: true,
-        damage: 2
+        hittingBox: {
+          sprite: palm,
+          rectangle : new PIXI.Rectangle(),
+          relativeRectangle: {
+            x: 90,
+            y: 15,
+            w: -190,
+            h: -30
+          },
+        },
+        damage: 2,
+        //hitbox: hitbox
       });
       this.stage.addChild(palm);
     }
@@ -94,6 +108,25 @@ module.exports = class Background {
       } else if (el.sprite instanceof PIXI.Sprite) {
         el.sprite.position.x = this.xStaticSprite(el);
         el.sprite.position.y = el.worldY - el.depth * ship.worldY;
+        let x = el.sprite.x - el.sprite.width/2;
+        let y = el.sprite.y - el.sprite.height/2;
+        let w = el.sprite.width;
+        let h = el.sprite.height;
+        if (el.hittingBox.relativeRectangle) {
+          x += el.hittingBox.relativeRectangle.x;
+          y += el.hittingBox.relativeRectangle.y;
+          w += el.hittingBox.relativeRectangle.w;
+          h += el.hittingBox.relativeRectangle.h;
+        }
+        el.hittingBox.rectangle.x = x;
+        el.hittingBox.rectangle.y = y;
+        el.hittingBox.rectangle.width = w;
+        el.hittingBox.rectangle.height = h;
+        if(el.hitbox){
+          el.hitbox.clear();
+          el.hitbox.lineStyle(1, 0xa0ee00, 1);
+          el.hitbox.drawRect(x, y, w, h);
+        }
       } else if (el.sprite instanceof PIXI.Graphics) {
         el.sprite.clear();
         el.sprite.moveTo(minX, el.equation(minX + ship.worldX * el.depth) - ship.worldY * el.depth);
@@ -109,9 +142,9 @@ module.exports = class Background {
         el.sprite.lineTo(minX, this._game.renderer.height);
         el.sprite.endFill();
       }
-      if (el.hittingBox === true) {
+      if (el.hittingBox) {
         for (let s = 0; s < this._game.spaceShips.length; s++) {
-          this._game.spaceShips[s].checkHit(el.sprite, el.damage);
+          this._game.spaceShips[s].checkHit(el.hittingBox, el.damage, t);
         }
       }
     }

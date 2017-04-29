@@ -25,6 +25,8 @@ module.exports = class Ship {
     this.xOffset = config.xOffset || Math.floor(this.renderer.width / 2);
     this.yOffset = config.yOffset || Math.floor(this.renderer.height / 4);
     this.depth = 1;
+    this._timeLastHit = 0;
+    this.HIT_INTERVAL = 200;
     this.MAX_HEALTH = this.health = config.health || 100;
 
     this.accelerationX = 2 / 1000;
@@ -32,6 +34,10 @@ module.exports = class Ship {
     this.dx = 5 / 50;
     this.dy = 10 / 50;
     this.maxSpeedX = 2;
+    // create a random instability for the ship between 0 - 1
+    this.instability = 3;
+    this.vx = 0;
+    this.vy = 0;
 
     this.state = 1; // -1 boom - 1 start - other number for other animations
     this._timeLastBulletFired = 0;
@@ -91,7 +97,11 @@ module.exports = class Ship {
     this._ship.y = this.yOffset;
     this.worldX = Math.random() * this._game.worldWidth;
     this.worldY = this.yOffset;
-
+    /*
+     //draw hitbox for debug
+     this.hitbox = new PIXI.Graphics();
+     this.hitbox.anchor = new PIXI.Point(0.5, 0.5);
+     */
     if (this.shipColor) {
       this._ship.tint = this.shipColor;
     }
@@ -135,11 +145,6 @@ module.exports = class Ship {
     }
     this.explosion = new PIXI.extras.AnimatedSprite(this.explosions);
 
-    // create a random instability for the ship between 0 - 1
-    this.instability = 0.5;
-    this.vx = 0;
-    this.vy = 0;
-
     this.stage.addChild(this._ship, this.lifeBarContainer);
   }
 
@@ -169,43 +174,48 @@ module.exports = class Ship {
    * @public
    * @returns {Boolean} wasHit
    */
-  checkHit(hitbox, objectDamage) {
-    let touched = false;
-    if (hitbox instanceof PIXI.Graphics) {
-      touched = false;
-    } else if (hitbox.Rectangle instanceof PIXI.Rectangle) {
-      touched = this._ship.hitTestRectangle(hitbox.Rectangle);
-    } else if (hitbox.position instanceof PIXI.Point || hitbox.position instanceof PIXI.ObservablePoint) {
-      touched = this._ship.containsPoint(hitbox.position);
-    }
-    if (touched) {
-      // Ok, we're hit. Flash red
-      this._ship.tint = 0xFF0000;
-      this.hitHighlightStart = performance.now();
-
-      // Remove decrement health by object damage
-      this.health -= objectDamage;
-
-      if (this.health <= 0) {
-        // oh dear, we're dead
-        this.state = -1;
-        this.explosion.position.x = this._ship.position.x;
-        this.explosion.position.y = this._ship.position.y;
-        this._ship.position.x = -50;
-        this._ship.position.y = -50;
-        this.explosion.anchor.x = 0.5;
-        this.explosion.anchor.y = 0.5;
-        this.explosion.rotation = 0;
-        this.explosion.animationSpeed = 0.3;
-        this.explosion.loop = false;
-        this._game.stage.addChild(this.explosion);
-        this.explosion.play();
-        this.updateLifeBarStyle();
-      } else {
-        // still alive, but taken some damage. Update text color from green to red
-        this.updateLifeBarStyle();
+  checkHit(hitbox, objectDamage, currentTime) {
+    if (currentTime > this._timeLastHit + this.HIT_INTERVAL) {
+      let touched = false;
+      if (hitbox instanceof PIXI.Graphics) {
+        touched = false;
+      } else if (hitbox.rectangle instanceof PIXI.Rectangle) {
+        touched = bump.hitTestRectangle(hitbox.rectangle, this._ship);
+      } else if (hitbox.sprite instanceof PIXI.Sprite) {
+        touched = bump.rectangleCollision(this._ship, hitbox.sprite);
+      } else if (hitbox.position instanceof PIXI.Point || hitbox.position instanceof PIXI.ObservablePoint) {
+        touched = this._ship.containsPoint(hitbox.position);
       }
-      return true;
+      if (touched) {
+        // Ok, we're hit. Flash red
+        this._ship.tint = 0xFF0000;
+        this.hitHighlightStart = performance.now();
+
+        // Remove decrement health by object damage
+        this.health -= objectDamage;
+
+        if (this.health <= 0) {
+          // oh dear, we're dead
+          this.state = -1;
+          this.explosion.position.x = this._ship.position.x;
+          this.explosion.position.y = this._ship.position.y;
+          this._ship.position.x = -50;
+          this._ship.position.y = -50;
+          this.explosion.anchor.x = 0.5;
+          this.explosion.anchor.y = 0.5;
+          this.explosion.rotation = 0;
+          this.explosion.animationSpeed = 0.3;
+          this.explosion.loop = false;
+          this._game.stage.addChild(this.explosion);
+          this.explosion.play();
+          this.updateLifeBarStyle();
+        } else {
+          // still alive, but taken some damage. Update text color from green to red
+          this.updateLifeBarStyle();
+        }
+        this._timeLastHit = currentTime;
+        return true;
+      }
     }
     return false;
   }
@@ -300,6 +310,12 @@ module.exports = class Ship {
       this._ship.position.y = this.yOffset;
       this._ship.position.x += Math.sin(this.count * 5) * this.instability;
       this._ship.position.y += Math.cos(this.count * 5) * this.instability;
+
+      if (this.hitbox) {
+        this.hitbox.clear();
+        this.hitbox.lineStyle(1, 0x0000FF, 1);
+        this.hitbox.drawRect(this._ship.x - this._ship.width / 2, this._ship.y - this._ship.height / 2, this._ship.width, this._ship.height);
+      }
 
       this.worldX = this._game.mod((this.worldX + this._game.ship.vx * dt ), this._game.worldWidth);
       this.worldY += this._game.ship.vy * dt;

@@ -22,7 +22,6 @@ module.exports = class BulletManager {
     }
 
     let bullet = this._passiveBullets.pop();
-    bullet.tint = spaceShip._ship.tint;
     bullet.position.x = x;
     bullet.position.y = y;
     bullet.worldX = spaceShip.worldX;
@@ -66,7 +65,7 @@ module.exports = class BulletManager {
           if (this._game.spaceShips[s] === bullet.source) {
             continue;
           }
-          if (this._game.spaceShips[s].checkHit(bullet, bullet.damage)) {
+          if (this._game.spaceShips[s].checkHit({sprite: bullet}, bullet.damage,t)) {
             this.recycleBullet(bullet, i);
           }
         }
