@@ -28,12 +28,10 @@ module.exports = class Ship {
     this.MAX_HEALTH = this.health = config.health || 100;
 
     this.accelerationX = 2 / 1000;
-    this.accelerationY = 1 / 1000;
     // Time that passes between acceleration
     this.dx = 5 / 50;
-    this.dy = 5 / 50;
-    this.maxSpeedX = 3;
-    this.maxSpeedY = 1;
+    this.dy = 10 / 50;
+    this.maxSpeedX = 2;
 
     this.state = 1; // -1 boom - 1 start - other number for other animations
     this._timeLastBulletFired = 0;
@@ -74,11 +72,13 @@ module.exports = class Ship {
     //Create a rectangle object that defines the position and
     //size of the sub-image you want to extract from the texture
     this.Rect = {};
-    for (var pos in this.sprites) {
-      this.Rect[pos] = new PIXI.Rectangle(this.sprites[pos].x,
-        this.sprites[pos].y,
-        this.sprites[pos].w,
-        this.sprites[pos].h)
+    for (let pos in this.sprites) {
+      if (this.sprites.hasOwnProperty(pos)) {
+        this.Rect[pos] = new PIXI.Rectangle(this.sprites[pos].x,
+          this.sprites[pos].y,
+          this.sprites[pos].w,
+          this.sprites[pos].h);
+      }
     }
 
     //Tell the texture to use that rectangular section
@@ -130,13 +130,13 @@ module.exports = class Ship {
     //manage explosion animation
     this.explosions = [];
     this.explosionSteps = 31;
-    for (var i = 0; i <= this.explosionSteps; i++) {
+    for (let i = 0; i <= this.explosionSteps; i++) {
       this.explosions.push(PIXI.utils.TextureCache["expl_06_00" + this.pad(i, 2, '0') + ".png"]);
     }
     this.explosion = new PIXI.extras.AnimatedSprite(this.explosions);
 
-    // create a random instability for the ship between 1 - 5
-    this.instability = (1 + Math.random() * 5);
+    // create a random instability for the ship between 0 - 1
+    this.instability = 0.5;
     this.vx = 0;
     this.vy = 0;
 
@@ -146,14 +146,14 @@ module.exports = class Ship {
   updateLifeBarStyle() {
     this.lifeBarGauge.clear();
     if (this.health > 0) {
-      var f = ( this.health / this.MAX_HEALTH );
-      var g = Math.floor(f * 255);
-      var r = Math.floor(( 1 - f ) * 255);
+      let f = ( this.health / this.MAX_HEALTH );
+      let g = Math.floor(f * 255);
+      let r = Math.floor(( 1 - f ) * 255);
       this.lifeBarGauge.beginFill("0x" + r.toString(16) + g.toString(16) + "00");
       // draw a rectangle
       this.lifeBarGauge.drawRect(this.lifeBarX, 14, Math.floor(this.lifeBarWidthMax * f), 24);
       this.lifeBarTextStyle.fill = ['#ffffff', '#' + this.pad(r.toString(16), 2, '0') + this.pad(g.toString(16), 2, '0') + '00'];
-      this.lifeBarText.text = this.health + "/" + this.MAX_HEALTH + "        " + Math.round(this.worldX);
+      this.lifeBarText.text = this.health + "/" + this.MAX_HEALTH;
       this.lifeBarText.position.x = Math.floor(this.lifeBarContainer.width / 2 - this.lifeBarText.width / 2);
     } else {
       this.lifeBarText.text = "0/" + this.MAX_HEALTH;
@@ -163,13 +163,14 @@ module.exports = class Ship {
   /**
    * Check if the spaceship was hit by a bullet
    *
-   * @param   {PIXI.Point} bulletPosition
+   * @param   {object} hitbox
+   * @param   {PIXI.Point} objectDamage
    *
    * @public
    * @returns {Boolean} wasHit
    */
   checkHit(hitbox, objectDamage) {
-    var touched = false;
+    let touched = false;
     if (hitbox instanceof PIXI.Graphics) {
       touched = false;
     } else if (hitbox.Rectangle instanceof PIXI.Rectangle) {
@@ -211,12 +212,9 @@ module.exports = class Ship {
 
   accelerateX(more, dt, t) {
     //manage ship speed and position
-    var posMargin = 2 * this.instability;
     if (more === true) {
-      this.xOffset = Math.min(this.xOffset + this.dx * dt, this.renderer.width - posMargin - 2 * this.sprites.horizontal.w);
       this.vx = Math.min(this.vx + this.accelerationX * dt, this.maxSpeedX);
     } else {
-      this.xOffset = Math.max(this.xOffset - this.dy * dt, posMargin + 2 * this.sprites.horizontal.w);
       this.vx = Math.max(this.vx - this.accelerationX * dt, -1 * this.maxSpeedX);
     }
   }
@@ -224,10 +222,8 @@ module.exports = class Ship {
   accelerateY(more, dt, t) {
     if (more === true) {
       this.yOffset = Math.min(this.yOffset + this.dy * dt, this.renderer.height - this.sprites.horizontal.h);
-      this.vy = Math.min(this.vy + this.accelerationY * dt, this.maxSpeedY);
     } else {
-      this.yOffset = Math.max(this.yOffset - this.dy * dt, 0);
-      this.vy = Math.max(this.vy - this.accelerationY * dt, -1 * this.maxSpeedY);
+      this.yOffset = Math.max(this.yOffset - this.dy * dt, Math.round(this.sprites.horizontal.h / 2));
     }
   }
 
@@ -236,7 +232,6 @@ module.exports = class Ship {
       this.vx = (this.vx < 0) ? Math.max(-1 * this.maxSpeedX, this.vx - this.accelerationX * dt) : Math.min(this.maxSpeedX, this.vx + this.accelerationX * dt);
     } else {
       this.vx = (this.vx > 0) ? Math.max(0, this.vx - this.accelerationX * dt) : Math.min(0, this.vx + this.accelerationX * dt);
-      this.vy = (this.vy > 0) ? Math.max(0, this.vy - this.accelerationY * dt) : Math.min(0, this.vy + this.accelerationY * dt);
     }
   }
 
@@ -271,11 +266,11 @@ module.exports = class Ship {
   update(dt, currentTime) {
     // make the ship move a little
     this.count += 0.01;
-    if (isNaN(this.hitHighlightStart) == false && currentTime > this.hitHighlightStart + this.HIGHLIGHT_INTERVAL) {
+    if (isNaN(this.hitHighlightStart) === false && currentTime > this.hitHighlightStart + this.HIGHLIGHT_INTERVAL) {
       this._ship.tint = 16777215;
       this.hitHighlightStart = false;
     }
-    if (this.state == -1) {
+    if (this.state === -1) {
       this.health = 0;
       this.vx = 0;
       this.vy = 0;
@@ -297,16 +292,16 @@ module.exports = class Ship {
       }
       //Create the ship from the texture
       this._ship.texture = this.texture;
-      this._ship.position.x = this.xOffset;
-      this._ship.position.y = this.yOffset;
       if (this.shipColor) {
         this._ship.tint = this.shipColor;
       }
       //make the ship move a little
+      this._ship.position.x = this.xOffset;
+      this._ship.position.y = this.yOffset;
       this._ship.position.x += Math.sin(this.count * 5) * this.instability;
       this._ship.position.y += Math.cos(this.count * 5) * this.instability;
 
-      this.worldX = this._game.mod(( this.worldX + this._game.ship.vx * dt ), this._game.worldWidth);
+      this.worldX = this._game.mod((this.worldX + this._game.ship.vx * dt ), this._game.worldWidth);
       this.worldY += this._game.ship.vy * dt;
       this.updateLifeBarStyle();
 

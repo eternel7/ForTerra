@@ -51,7 +51,7 @@ module.exports = class Game extends EventEmitter {
     var _this = this;
 
     //set a world width to go around it
-    this.worldWidth = this.renderer.width * 2;
+    this.worldWidth = this.renderer.width * 5;
 
     //Add the background
     this.stage.background = new BackGround({
@@ -104,6 +104,15 @@ module.exports = class Game extends EventEmitter {
       ret += b;
     }
     return ret;
+  }
+  getScreenXof(el){
+    let sprite = (el instanceof PIXI.Sprite) ? el : el.sprite ;
+    if(this.ship instanceof Ship && sprite instanceof PIXI.Sprite && el.depth && el.worldX) {
+      //World is round sprite can be be nearer left or right
+      //take width of sprite as margin to not make it disappear once it touch a border of the screen
+      return this.mod(el.worldX - el.depth * this.ship.worldX + sprite.width + this.ship.xOffset, this.worldWidth) - sprite.width ;
+    }
+    return -50;
   }
   getScreenWorldRange(){
     let ship = this.ship;

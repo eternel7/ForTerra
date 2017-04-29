@@ -13,7 +13,7 @@ module.exports = class Background {
     this.setColor = config.color;
 
     //Static background
-    var skies = PIXI.loader.resources["skySpritesheet"].textures;
+    let skies = PIXI.loader.resources["skySpritesheet"].textures;
     this.sky = new PIXI.Sprite(skies["BGSkyBlue4.png"]);
 
     this.sky.width = this.renderer.width;
@@ -21,10 +21,10 @@ module.exports = class Background {
 
     //moving backgrounds
     this.backgrounds = [];
-    var groundY = this.renderer.height;
+    let groundY = this.renderer.height;
 
     //stars in the sky
-    var bgTexture = (config.bg && PIXI.loader.resources[config.bg].texture) || PIXI.loader.resources["background"].texture;
+    let bgTexture = (config.bg && PIXI.loader.resources[config.bg].texture) || PIXI.loader.resources["background"].texture;
     this.bg = new PIXI.extras.TilingSprite(
       bgTexture,
       this.renderer.width,
@@ -68,10 +68,8 @@ module.exports = class Background {
       this.backgrounds.push({
         sprite: palm,
         depth: 1,
-        origin: {
-          x: palm.position.x,
-          y: palm.position.y
-        },
+        worldX: palm.position.x,
+        worldY: palm.position.y,
         hittingBox: true,
         damage: 2
       });
@@ -80,11 +78,7 @@ module.exports = class Background {
   }
 
   xStaticSprite(el) {
-    const ship = this._game.ship;
-    //take width of sprite as margin to not make it disappear once it touch a border of the screen
-    let negativeValueMargin = el.sprite.width;
-    //World is round sprite can be be nearer left or right
-    return this._game.mod(el.origin.x - el.depth * ship.worldX + negativeValueMargin, this._game.worldWidth) - negativeValueMargin;
+    return this._game.getScreenXof(el);
   }
 
   update(dt, t) {
@@ -98,9 +92,8 @@ module.exports = class Background {
         el.sprite.tilePosition.x -= el.depth * ship.vx * dt;
         el.sprite.tilePosition.y = 0 - el.depth * ship.worldY;
       } else if (el.sprite instanceof PIXI.Sprite) {
-        var margin = el.sprite.width;
         el.sprite.position.x = this.xStaticSprite(el);
-        el.sprite.position.y = el.origin.y - el.depth * ship.worldY;
+        el.sprite.position.y = el.worldY - el.depth * ship.worldY;
       } else if (el.sprite instanceof PIXI.Graphics) {
         el.sprite.clear();
         el.sprite.moveTo(minX, el.equation(minX + ship.worldX * el.depth) - ship.worldY * el.depth);
