@@ -46,9 +46,12 @@ module.exports = class Game extends EventEmitter {
 
     // Frames are distributed unevenly - let's keep track of how much time has passed since the last one
     this._lastFrameTime = 0;
-    this.worldWidth = this.renderer.width * 1;
+
     //cache game var for use inside sub-objects
     var _this = this;
+
+    //set a world width to go around it
+    this.worldWidth = this.renderer.width * 2;
 
     //Add the background
     this.stage.background = new BackGround({
@@ -94,6 +97,7 @@ module.exports = class Game extends EventEmitter {
     requestAnimationFrame(this._tick.bind(this));
   }
 
+  //modulo always positive
   mod(a, b) {
     var ret = a % b;
     if (ret < 0) {

@@ -124,8 +124,8 @@ module.exports = class Ship {
     this.lifeBarText.position.x = Math.floor(this.lifeBarContainer.width / 2 - this.lifeBarText.width / 2);
     this.lifeBarText.position.y = Math.floor(this.lifeBarContainer.height / 2 - this.lifeBarText.height / 2) + 6;
     this.lifeBarContainer.addChild(this.lifeBarText);
-    this.lifeBarContainer.x = Math.round((this._game.renderer.width - this.lifeBarContainer.width) / 2);
-    this.lifeBarContainer.y = this._game.renderer.height - this.lifeBarContainer.height - 15;
+    this.lifeBarContainer.position.x = Math.round((this._game.renderer.width - this.lifeBarContainer.width) / 2);
+    this.lifeBarContainer.position.y = this._game.renderer.height - this.lifeBarContainer.height - 15;
 
     //manage explosion animation
     this.explosions = [];
@@ -289,8 +289,6 @@ module.exports = class Ship {
         this._ship.tint = this.shipColor;
       }
       //make the ship move a little
-      this.gravityX = this._ship.position.x;
-      this.gravityY = this._ship.position.y;
       this._ship.position.x += Math.sin(this.count * 5) * this.instability;
       this._ship.position.y += Math.cos(this.count * 5) * this.instability;
 

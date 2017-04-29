@@ -21,14 +21,14 @@ module.exports = class Background {
 
     //moving backgrounds
     this.backgrounds = [];
-    var groundY = Math.round(3 * this.renderer.height / 4);
+    var groundY = this.renderer.height;
 
     //stars in the sky
     var bgTexture = (config.bg && PIXI.loader.resources[config.bg].texture) || PIXI.loader.resources["background"].texture;
     this.bg = new PIXI.extras.TilingSprite(
       bgTexture,
       this.renderer.width,
-      groundY);
+      this.renderer.height);
 
     this.backgrounds.push({
       sprite: this.bg,
@@ -36,7 +36,7 @@ module.exports = class Background {
       hittingBox: false
     });
 
-    //TODO : add a ground
+    //World ground
     this.groundSrpite = new PIXI.Graphics();
     this.ground = {
       sprite: this.groundSrpite,
@@ -56,10 +56,12 @@ module.exports = class Background {
 
     this.backgrounds.push(this.ground);
     this.stage.addChild(this.sky, this.bg, this.groundSrpite);
-    //flore on the ground
-    var flore = PIXI.loader.resources["floreSpritesheet"];
-    for (var i = 0; i <= 10; i++) {
-      var palm = new PIXI.Sprite(flore.textures["palm03.png"]);
+
+    //Static sprites
+    //Flore on the ground
+    const flore = PIXI.loader.resources["floreSpritesheet"];
+    for (let i = 0; i <= 10; i++) {
+      let palm = new PIXI.Sprite(flore.textures["palm03.png"]);
       palm.anchor = new PIXI.Point(0.5, 0.5);
       palm.position.x = Math.random() * this._game.worldWidth;
       palm.position.y = this.ground.equation(palm.position.x) + Math.random() * 100 - 10;
@@ -71,27 +73,29 @@ module.exports = class Background {
           y: palm.position.y
         },
         hittingBox: true,
-        damage: 0
+        damage: 2
       });
       this.stage.addChild(palm);
     }
   }
 
   xStaticSprite(el) {
-    var ship = this._game.ship;
+    const ship = this._game.ship;
+    //take width of sprite as margin to not make it disappear once it touch a border of the screen
+    let negativeValueMargin = el.sprite.width;
     //World is round sprite can be be nearer left or right
-    return this._game.mod(el.origin.x - el.depth * ship.worldX,this._game.worldWidth);
+    return this._game.mod(el.origin.x - el.depth * ship.worldX + negativeValueMargin, this._game.worldWidth) - negativeValueMargin;
   }
 
   update(dt, t) {
-    var ship = this._game.ship;
-    var minX = 0;
-    var maxX = this._game.renderer.width;
+    const ship = this._game.ship;
+    let minX = 0;
+    let maxX = this._game.renderer.width;
 
-    for (var i = 0; i < this.backgrounds.length; i++) {
-      var el = this.backgrounds[i];
+    for (let i = 0; i < this.backgrounds.length; i++) {
+      let el = this.backgrounds[i];
       if (el.sprite instanceof PIXI.extras.TilingSprite) {
-        el.sprite.tilePosition.x = 0 - el.depth * ship.worldX;
+        el.sprite.tilePosition.x -=  el.depth * ship.vx * dt;
         el.sprite.tilePosition.y = 0 - el.depth * ship.worldY;
       } else if (el.sprite instanceof PIXI.Sprite) {
         el.sprite.position.x = this.xStaticSprite(el);
@@ -100,9 +104,9 @@ module.exports = class Background {
         el.sprite.clear();
         el.sprite.moveTo(minX, el.equation(minX + ship.worldX * el.depth) - ship.worldY * el.depth);
         el.sprite.beginFill(el.color);
-        var iteration = (maxX - minX) / 1000;
-        for (var x = minX + iteration; x <= maxX; x += iteration) {
-          var y = el.equation(x + ship.worldX * el.depth);
+        let iteration = (maxX - minX) / 1000;
+        for (let x = minX + iteration; x <= maxX; x += iteration) {
+          let y = el.equation(x + ship.worldX * el.depth);
           el.sprite.lineTo(x, y - ship.worldY * el.depth);
         }
         //last points
@@ -111,8 +115,8 @@ module.exports = class Background {
         el.sprite.lineTo(minX, this._game.renderer.height);
         el.sprite.endFill();
       }
-      if (el.hittingBox == true) {
-        for (var s = 0; s < this._game.spaceShips.length; s++) {
+      if (el.hittingBox === true) {
+        for (let s = 0; s < this._game.spaceShips.length; s++) {
           this._game.spaceShips[s].checkHit(el.sprite, el.damage);
         }
       }
