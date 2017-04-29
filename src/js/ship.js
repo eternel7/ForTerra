@@ -120,7 +120,7 @@ module.exports = class Ship {
       stroke: '#4a1850',
       strokeThickness: 5
     });
-    this.lifeBarText = new PIXI.Text(this.health + "/" + this.MAX_HEALTH + "        " + Math.round(this.worldX), this.lifeBarTextStyle);
+    this.lifeBarText = new PIXI.Text(this.health + "/" + this.MAX_HEALTH, this.lifeBarTextStyle);
     this.lifeBarText.position.x = Math.floor(this.lifeBarContainer.width / 2 - this.lifeBarText.width / 2);
     this.lifeBarText.position.y = Math.floor(this.lifeBarContainer.height / 2 - this.lifeBarText.height / 2) + 6;
     this.lifeBarContainer.addChild(this.lifeBarText);
@@ -231,6 +231,15 @@ module.exports = class Ship {
     }
   }
 
+  accelerate(more, dt, t) {
+    if (more === true) {
+      this.vx = (this.vx < 0) ? Math.max(-1 * this.maxSpeedX, this.vx - this.accelerationX * dt) : Math.min(this.maxSpeedX, this.vx + this.accelerationX * dt);
+    } else {
+      this.vx = (this.vx > 0) ? Math.max(0, this.vx - this.accelerationX * dt) : Math.min(0, this.vx + this.accelerationX * dt);
+      this.vy = (this.vy > 0) ? Math.max(0, this.vy - this.accelerationY * dt) : Math.min(0, this.vy + this.accelerationY * dt);
+    }
+  }
+
   catchControl(dt, currentTime) {
     //Capture the keyboard arrow keys
     if (control.isDown(control.UP) || control.isDown(control.UP2)) {
@@ -251,6 +260,11 @@ module.exports = class Ship {
         this._game.bulletManager.add(this._ship.x, this._ship.y, this.vx, this);
         this._timeLastBulletFired = currentTime;
       }
+    }
+    if (control.isDown(control.ACCELERATE)) {
+      this.accelerate(true, dt, currentTime);
+    } else if (control.isDown(control.DECELERATE)) {
+      this.accelerate(false, dt, currentTime);
     }
   }
 

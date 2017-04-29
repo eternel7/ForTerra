@@ -91,13 +91,14 @@ module.exports = class Background {
     const ship = this._game.ship;
     let minX = 0;
     let maxX = this._game.renderer.width;
-
+    //var worldRange = this._game.getScreenWorldRange();
     for (let i = 0; i < this.backgrounds.length; i++) {
       let el = this.backgrounds[i];
       if (el.sprite instanceof PIXI.extras.TilingSprite) {
-        el.sprite.tilePosition.x -=  el.depth * ship.vx * dt;
+        el.sprite.tilePosition.x -= el.depth * ship.vx * dt;
         el.sprite.tilePosition.y = 0 - el.depth * ship.worldY;
       } else if (el.sprite instanceof PIXI.Sprite) {
+        var margin = el.sprite.width;
         el.sprite.position.x = this.xStaticSprite(el);
         el.sprite.position.y = el.origin.y - el.depth * ship.worldY;
       } else if (el.sprite instanceof PIXI.Graphics) {

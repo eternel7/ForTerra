@@ -105,4 +105,24 @@ module.exports = class Game extends EventEmitter {
     }
     return ret;
   }
+  getScreenWorldRange(){
+    let ship = this.ship;
+    if(ship instanceof Ship){
+      let x1 = this.mod(ship.worldX - ship._ship.position.x,this.worldWidth);
+      let x2 = this.mod(ship.worldX - ship._ship.position.x + this.renderer.width,this.worldWidth);
+      let xMin = Math.min(x1,x2);
+      let xMax = Math.max(x1,x2);
+      x1 = (xMin === 0) ? xMax : xMin;
+      x2 = (xMin === 0) ? this.worldWidth : xMax;
+      let x3 = (xMin === 0) ? 0 : 0;
+      let x4 = (xMin === 0) ? xMin : 0;
+      return  {
+        min:  x1,
+        max:  x2,
+        min2: x3,
+        max2: x4
+      }
+    }
+    return undefined;
+  }
 }
