@@ -4,10 +4,11 @@ module.exports = class Enemy {
     this.scale = config.scale || 1;
     this.depth = 1;
     this.damage = 10;
-    this.randomNumber = Math.round(10*Math.random());
+    this.randomNumberX = Math.round(10*Math.random());
+    this.randomNumberY = Math.round(10*Math.random());
   }
 
   moveFunction(el, dt, t) {
-    return {x: el.randomNumber, y: Math.cos(t / 1000) * 50 + t/1000};
+    return {x: el.randomNumberX+1, y: Math.cos(t / 1000) * 50 + this.randomNumberY * t/1000};
   }
 };

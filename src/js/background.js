@@ -36,13 +36,13 @@ module.exports = class Background {
     });
     this.stage.addChild(palm);
   }
-  addEnemy(enemy,stage){
+  addEnemy(enemy){
     let sprite = new PIXI.Sprite(enemy.sprite);
     sprite.anchor = new PIXI.Point(0.5, 0.5);
     sprite.scale.x = enemy.scale;
     sprite.scale.y = enemy.scale;
-    sprite.position.x = 100;//Math.random() * this._game.worldWidth;
-    sprite.position.y = 350;//(this._game.renderer.height - this.ground.equation(sprite.position.x))* Math.random() ;
+    sprite.position.x = Math.random() * this._game.worldWidth*0.8;
+    sprite.position.y = (this._game.renderer.height - 350)* Math.random() ;
     this.backgrounds.push({
       sprite: sprite,
       depth: 1,
@@ -60,10 +60,11 @@ module.exports = class Background {
       },
       damage: 20,
       moveFunction: enemy.moveFunction,
-      randomNumber: enemy.randomNumber,
+      randomNumberX: enemy.randomNumberX,
+      randomNumberY: enemy.randomNumberY,
       game: this._game
     });
-    stage.addChild(sprite);
+    this.stage.addChild(sprite);
   }
   constructor(config) {
     // user defined properties
@@ -142,28 +143,27 @@ module.exports = class Background {
     this.stage.addChild(this.groundSrpite);
 
     //Moving sprites : enemies
-    let flyingBlock = new Enemy({sprite: PIXI.utils.TextureCache["asteroids"],scale:0.5});
-    flyingBlock.sprite.frame = new PIXI.Rectangle(0, 0, 128, 128);
-
-    this.addEnemy(flyingBlock,this.stage);
+    for (let i = 0; i <= 10*this._game.worldSizeFactor; i++) {
+      let flyingBlock = new Enemy({sprite: PIXI.utils.TextureCache["asteroids"],scale:0.5});
+      flyingBlock.sprite.frame = new PIXI.Rectangle(0, 0, 128, 128);
+      this.addEnemy(flyingBlock, this.stage);
+    }
 
     //Static sprites
     //Flore on the ground
-    /*
     const flore = PIXI.loader.resources["floreSpritesheet"].textures;
     var moreFlore = this.randomProperty(flore);
     var lessFlore = this.randomProperty(flore);
     var fewerFlore = this.randomProperty(flore);
-    for (let i = 0; i <= 30; i++) {
-      this.addStaticSprite(moreFlore)
+    for (let i = 0; i <= 10*this._game.worldSizeFactor; i++) {
+      this.addStaticSprite(moreFlore);
     }
-    for (let i = 0; i <= 10; i++) {
-      this.addStaticSprite(lessFlore)
+    for (let i = 0; i <= 5*this._game.worldSizeFactor; i++) {
+      this.addStaticSprite(lessFlore);
     }
-    for (let i = 0; i <= 5; i++) {
-      this.addStaticSprite(fewerFlore)
+    for (let i = 0; i <= 2*this._game.worldSizeFactor; i++) {
+      this.addStaticSprite(fewerFlore);
     }
-    */
   }
 
   xStaticSprite(el, dt, t) {
