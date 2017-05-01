@@ -1,4 +1,5 @@
 const PIXI = require('pixi.js');
+const Planet = require('./planet');
 
 module.exports = class Background {
 
@@ -35,6 +36,25 @@ module.exports = class Background {
       depth: 0.01,
       hittingBox: false
     });
+    this.stage.addChild(this.sky, this.bg);
+
+    //Add a planet pin point in the sky
+    const planets = PIXI.loader.resources["planetsSpritesheet"];
+    let planet = new PIXI.Sprite(planets.textures["planet" + Math.round(Math.random() * 20) + ".png"]);
+    planet.anchor = new PIXI.Point(0.5, 0.5);
+    planet.position.x = 0; //Math.random() * this._game.worldWidth;
+    planet.position.y = 350; //Math.random() * 150 + 250;
+    var planetBehaviour = new Planet();
+    this.backgrounds.push({
+      sprite: planet,
+      depth: 0.05,
+      worldX: planet.position.x,
+      worldY: planet.position.y,
+      damage: 0,
+      moveFunction: planetBehaviour.moveFunction
+      //hitbox: hitbox
+    });
+    this.stage.addChild(planet);
 
     //World ground
     this.groundSrpite = new PIXI.Graphics();
@@ -55,12 +75,12 @@ module.exports = class Background {
     };
 
     this.backgrounds.push(this.ground);
-    this.stage.addChild(this.sky, this.bg, this.groundSrpite);
+    this.stage.addChild(this.groundSrpite);
 
     //Static sprites
     //Flore on the ground
     const flore = PIXI.loader.resources["floreSpritesheet"];
-    for (let i = 0; i <= 50; i++) {
+    for (let i = 0; i <= 10; i++) {
       let palm = new PIXI.Sprite(flore.textures["palm03.png"]);
       palm.anchor = new PIXI.Point(0.5, 0.5);
       palm.position.x = Math.random() * this._game.worldWidth;
@@ -76,7 +96,7 @@ module.exports = class Background {
         worldY: palm.position.y,
         hittingBox: {
           sprite: palm,
-          rectangle : new PIXI.Rectangle(),
+          rectangle: new PIXI.Rectangle(),
           relativeRectangle: {
             x: 90,
             y: 15,
@@ -84,15 +104,15 @@ module.exports = class Background {
             h: -30
           },
         },
-        damage: 2,
+        damage: 2
         //hitbox: hitbox
       });
       this.stage.addChild(palm);
     }
   }
 
-  xStaticSprite(el) {
-    return this._game.getScreenXof(el);
+  xStaticSprite(el, dt, t) {
+    return this._game.getScreenXof(el, dt, t);
   }
 
   update(dt, t) {
@@ -106,26 +126,35 @@ module.exports = class Background {
         el.sprite.tilePosition.x -= el.depth * ship.vx * dt;
         el.sprite.tilePosition.y = 0 - el.depth * ship.worldY;
       } else if (el.sprite instanceof PIXI.Sprite) {
-        el.sprite.position.x = this.xStaticSprite(el);
-        el.sprite.position.y = el.worldY - el.depth * ship.worldY;
-        let x = el.sprite.x - el.sprite.width/2;
-        let y = el.sprite.y - el.sprite.height/2;
-        let w = el.sprite.width;
-        let h = el.sprite.height;
-        if (el.hittingBox.relativeRectangle) {
-          x += el.hittingBox.relativeRectangle.x;
-          y += el.hittingBox.relativeRectangle.y;
-          w += el.hittingBox.relativeRectangle.w;
-          h += el.hittingBox.relativeRectangle.h;
+        el.sprite.position.x = this.xStaticSprite(el, dt, t);
+        el.sprite.position.y = el.worldY - ship.worldY;
+        if (el.moveFunction) {
+          var relativeMove = el.moveFunction(el, dt, t);
+          if (relativeMove && (typeof relativeMove === 'object')) {
+            el.sprite.position.x += relativeMove.x;
+            el.sprite.position.y += relativeMove.y;
+          }
         }
-        el.hittingBox.rectangle.x = x;
-        el.hittingBox.rectangle.y = y;
-        el.hittingBox.rectangle.width = w;
-        el.hittingBox.rectangle.height = h;
-        if(el.hitbox){
-          el.hitbox.clear();
-          el.hitbox.lineStyle(1, 0xa0ee00, 1);
-          el.hitbox.drawRect(x, y, w, h);
+        if (el.hittingBox) {
+          let x = el.sprite.x - el.sprite.width / 2;
+          let y = el.sprite.y - el.sprite.height / 2;
+          let w = el.sprite.width;
+          let h = el.sprite.height;
+          if (el.hittingBox.relativeRectangle) {
+            x += el.hittingBox.relativeRectangle.x;
+            y += el.hittingBox.relativeRectangle.y;
+            w += el.hittingBox.relativeRectangle.w;
+            h += el.hittingBox.relativeRectangle.h;
+          }
+          el.hittingBox.rectangle.x = x;
+          el.hittingBox.rectangle.y = y;
+          el.hittingBox.rectangle.width = w;
+          el.hittingBox.rectangle.height = h;
+          if (el.hitbox) {
+            el.hitbox.clear();
+            el.hitbox.lineStyle(1, 0xa0ee00, 1);
+            el.hitbox.drawRect(x, y, w, h);
+          }
         }
       } else if (el.sprite instanceof PIXI.Graphics) {
         el.sprite.clear();

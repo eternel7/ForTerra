@@ -27,6 +27,7 @@ PIXI.loader.add([
   {name: 'floreSpritesheet', url: 'static/resources/images/flore/flore.json'},
   {name: "UIBar01", url: "static/resources/images/backgrounds/UIBar01.png"},
   {name: "ships", url: "static/resources/images/ships/wc2ships_sheet.png"},
+  {name: "planetsSpritesheet", url: "static/resources/images/space/planets.json"},
   {name: 'bullets', url: 'static/resources/images/shoots/beams.png'},
 
 ])

@@ -51,7 +51,7 @@ module.exports = class Game extends EventEmitter {
     var _this = this;
 
     //set a world width to go around it
-    this.worldWidth = this.renderer.width * 10;
+    this.worldWidth = this.renderer.width * 1.5;
 
     //Add the background
     this.stage.background = new BackGround({
@@ -67,7 +67,7 @@ module.exports = class Game extends EventEmitter {
       parent: _this,
       initialBullets: 10
     });
-    this.spaceShips=[];
+    this.spaceShips = [];
     this.spaceShips.push(this.ship);
 
     // On the next frame, the show begins
@@ -85,7 +85,7 @@ module.exports = class Game extends EventEmitter {
    */
   _tick(currentTime) {
     // notify objects of the impeding update.
-    this.emit( 'update', currentTime - this._lastFrameTime, currentTime );
+    this.emit('update', currentTime - this._lastFrameTime, currentTime);
 
     // store the time
     this._lastFrameTime = currentTime;
@@ -105,33 +105,15 @@ module.exports = class Game extends EventEmitter {
     }
     return ret;
   }
-  getScreenXof(el){
-    let sprite = (el instanceof PIXI.Sprite) ? el : el.sprite ;
-    if(this.ship instanceof Ship && sprite instanceof PIXI.Sprite && el.depth && el.worldX) {
+
+  getScreenXof(el,dt,t) {
+    let sprite = (el instanceof PIXI.Sprite) ? el : el.sprite;
+    if (this.ship instanceof Ship && sprite instanceof PIXI.Sprite &&
+      (typeof el.depth === 'number') && (typeof sprite.position.x === 'number')) {
       //World is round sprite can be be nearer left or right
       //take width of sprite as margin to not make it disappear once it touch a border of the screen
-      return this.mod(el.worldX - el.depth * this.ship.worldX + sprite.width + this.ship.xOffset, this.worldWidth) - sprite.width ;
+      return this.mod(sprite.position.x + sprite.width - el.depth * this.ship.vx * dt, this.worldWidth )- sprite.width;
     }
     return -50;
-  }
-  getScreenWorldRange(){
-    let ship = this.ship;
-    if(ship instanceof Ship){
-      let x1 = this.mod(ship.worldX - ship._ship.position.x,this.worldWidth);
-      let x2 = this.mod(ship.worldX - ship._ship.position.x + this.renderer.width,this.worldWidth);
-      let xMin = Math.min(x1,x2);
-      let xMax = Math.max(x1,x2);
-      x1 = (xMin === 0) ? xMax : xMin;
-      x2 = (xMin === 0) ? this.worldWidth : xMax;
-      let x3 = (xMin === 0) ? 0 : 0;
-      let x4 = (xMin === 0) ? xMin : 0;
-      return  {
-        min:  x1,
-        max:  x2,
-        min2: x3,
-        max2: x4
-      }
-    }
-    return undefined;
   }
 }

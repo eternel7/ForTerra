@@ -31,8 +31,8 @@ module.exports = class BulletManager {
     bullet.duration = 0;
     bullet.maxDuration = spaceShip.weaponmaxDuration || 7000; //in milliseconds
     bullet.friction = spaceShip.weaponFriction || 0.001;
-    bullet.normalSpeed = spaceShip.weaponSpeed || 0.5;
-    bullet.speed = bullet.normalSpeed + spaceShip.vx;
+    bullet.normalSpeed = spaceShip.weaponSpeed || 0.5 ;
+    bullet.speed = bullet.normalSpeed + Math.abs(spaceShip.vx);
     bullet.damage = spaceShip.weaponDamage || 5;
     bullet.rotation = (shipSpeedDirection >= 0) ? Math.PI / 2 : -1 * Math.PI / 2;
     bullet.source = spaceShip;
@@ -53,19 +53,17 @@ module.exports = class BulletManager {
         // Bullet made the max distance it could, time to recycle it
         this.recycleBullet(bullet, i);
       } else {
-        bullet.worldX = this._game.mod(bullet.worldX + distX, this._game.worldWidth);
         let el = {
           sprite: bullet,
-          depth: 1,
-          worldX: bullet.worldX
+          depth: 1
         };
-        bullet.position.x = this._game.getScreenXof(el);
+        bullet.position.x = this._game.getScreenXof(el, dt, t) + distX;
         // Bullet is still on stage, let's perform hit detection
         for (s = 0; s < this._game.spaceShips.length; s++) {
           if (this._game.spaceShips[s] === bullet.source) {
             continue;
           }
-          if (this._game.spaceShips[s].checkHit({sprite: bullet}, bullet.damage,t)) {
+          if (this._game.spaceShips[s].checkHit({sprite: bullet}, bullet.damage, t)) {
             this.recycleBullet(bullet, i);
           }
         }
