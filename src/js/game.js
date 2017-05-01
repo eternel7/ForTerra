@@ -51,7 +51,7 @@ module.exports = class Game extends EventEmitter {
     var _this = this;
 
     //set a world width to go around it
-    this.worldWidth = this.renderer.width * 1.5;
+    this.worldWidth = this.renderer.width * 2;
 
     //Add the background
     this.stage.background = new BackGround({
