@@ -33,7 +33,6 @@ module.exports = class EnemyManager {
 
   update(dt, t) {
     const ship = this._game.ship;
-    console.log(this.activeEnemies.length);
     for (let i = 0; i < this.activeEnemies.length; i++) {
       let enemy = this.activeEnemies[i];
       enemy.sprite.position.x = this._game.getScreenXof(enemy, dt, t);
