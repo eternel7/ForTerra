@@ -169,7 +169,7 @@ module.exports = class Ship {
    * Check if the spaceship was hit by a bullet
    *
    * @param   {object} hitbox
-   * @param   {PIXI.Point} objectDamage
+   * @param   {Number} objectDamage
    *
    * @public
    * @returns {Boolean} wasHit

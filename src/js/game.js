@@ -1,9 +1,9 @@
 const PIXI = require('pixi.js');
 const EventEmitter = require('events').EventEmitter;
-const StageSet = require('./stageSet');
 const BackGround = require('./background');
 const Ship = require('./ship');
 const BulletManager = require('./bullet-manager');
+const EnemyManager = require('./enemy-manager');
 
 /**
  * This class represents the game as a whole. It is responsible for
@@ -59,17 +59,22 @@ module.exports = class Game extends EventEmitter {
       parent: _this
     });
 
-    // Keep reference to ship first because all is based on its movements
+    this.enemyManager = new EnemyManager({
+      parent: _this,
+      initialEnemies: this.worldSizeFactor * 10
+    });
+
     this.ship = new Ship({
       parent: _this,
       color: false //"0xff0000"
     });
+    this.spaceShips = [];
+    this.spaceShips.push(this.ship);
+
     this.bulletManager = new BulletManager({
       parent: _this,
       initialBullets: 10
     });
-    this.spaceShips = [];
-    this.spaceShips.push(this.ship);
 
     // On the next frame, the show begins
     requestAnimationFrame(this._tick.bind(this));
@@ -107,13 +112,13 @@ module.exports = class Game extends EventEmitter {
     return ret;
   }
 
-  getScreenXof(el,dt,t) {
+  getScreenXof(el, dt, t) {
     let sprite = (el instanceof PIXI.Sprite) ? el : el.sprite;
     if (this.ship instanceof Ship && sprite instanceof PIXI.Sprite &&
       (typeof el.depth === 'number') && (typeof sprite.position.x === 'number')) {
       //World is round sprite can be be nearer left or right
       //take width of sprite as margin to not make it disappear once it touch a border of the screen
-      return this.mod(sprite.position.x + sprite.width - el.depth * this.ship.vx * dt, this.worldWidth )- sprite.width;
+      return this.mod(sprite.position.x + sprite.width - el.depth * this.ship.vx * dt, this.worldWidth) - sprite.width;
     }
     return -50;
   }

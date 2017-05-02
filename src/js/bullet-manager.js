@@ -40,7 +40,7 @@ module.exports = class BulletManager {
   }
 
   update(dt, t) {
-    var i, s, bullet;
+    let i, s, bullet;
 
     for (i = 0; i < this._activeBullets.length; i++) {
       bullet = this._activeBullets[i];
@@ -65,6 +65,11 @@ module.exports = class BulletManager {
           }
           if (this._game.spaceShips[s].checkHit({sprite: bullet}, bullet.damage, t)) {
             this.recycleBullet(bullet, i);
+          }
+        }
+        for (s = 0; s < this._game.enemyManager.activeEnemies.length; s++) {
+          if(this._game.enemyManager.activeEnemies[s].checkHit({sprite: bullet, enemyId: s}, bullet.damage, t)) {
+             this.recycleBullet(bullet, i);
           }
         }
       }

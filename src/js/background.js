@@ -1,13 +1,13 @@
 const PIXI = require('pixi.js');
 const Planet = require('./planet');
-const Enemy = require('./enemy');
 
 module.exports = class Background {
   randomProperty(obj) {
-    var keys = Object.keys(obj)
-    return obj[keys[ keys.length * Math.random() << 0]];
+    let keys = Object.keys(obj);
+    return obj[keys[keys.length * Math.random() << 0]];
   }
-  addStaticSprite(texture){
+
+  addStaticSprite(texture) {
     let palm = new PIXI.Sprite(texture);
     palm.anchor = new PIXI.Point(0.5, 0.5);
     palm.position.x = Math.random() * this._game.worldWidth;
@@ -36,36 +36,7 @@ module.exports = class Background {
     });
     this.stage.addChild(palm);
   }
-  addEnemy(enemy){
-    let sprite = new PIXI.Sprite(enemy.sprite);
-    sprite.anchor = new PIXI.Point(0.5, 0.5);
-    sprite.scale.x = enemy.scale;
-    sprite.scale.y = enemy.scale;
-    sprite.position.x = Math.random() * this._game.worldWidth*0.8;
-    sprite.position.y = (this._game.renderer.height - 350)* Math.random() ;
-    this.backgrounds.push({
-      sprite: sprite,
-      depth: 1,
-      worldX: sprite.position.x,
-      worldY: sprite.position.y,
-      hittingBox: {
-        sprite: sprite,
-        rectangle: new PIXI.Rectangle(),
-        relativeRectangle: {
-          x: 0,
-          y: 0,
-          w: 0,
-          h: 0
-        },
-      },
-      damage: 20,
-      moveFunction: enemy.moveFunction,
-      randomNumberX: enemy.randomNumberX,
-      randomNumberY: enemy.randomNumberY,
-      game: this._game
-    });
-    this.stage.addChild(sprite);
-  }
+
   constructor(config) {
     // user defined properties
     this._game = config.parent;
@@ -142,26 +113,19 @@ module.exports = class Background {
     this.backgrounds.push(this.ground);
     this.stage.addChild(this.groundSrpite);
 
-    //Moving sprites : enemies
-    for (let i = 0; i <= 10*this._game.worldSizeFactor; i++) {
-      let flyingBlock = new Enemy({sprite: PIXI.utils.TextureCache["asteroids"],scale:0.5});
-      flyingBlock.sprite.frame = new PIXI.Rectangle(0, 0, 128, 128);
-      this.addEnemy(flyingBlock, this.stage);
-    }
-
     //Static sprites
     //Flore on the ground
     const flore = PIXI.loader.resources["floreSpritesheet"].textures;
-    var moreFlore = this.randomProperty(flore);
-    var lessFlore = this.randomProperty(flore);
-    var fewerFlore = this.randomProperty(flore);
-    for (let i = 0; i <= 10*this._game.worldSizeFactor; i++) {
+    let moreFlore = this.randomProperty(flore);
+    let lessFlore = this.randomProperty(flore);
+    let fewerFlore = this.randomProperty(flore);
+    for (let i = 0; i <= 10 * this._game.worldSizeFactor; i++) {
       this.addStaticSprite(moreFlore);
     }
-    for (let i = 0; i <= 5*this._game.worldSizeFactor; i++) {
+    for (let i = 0; i <= 5 * this._game.worldSizeFactor; i++) {
       this.addStaticSprite(lessFlore);
     }
-    for (let i = 0; i <= 2*this._game.worldSizeFactor; i++) {
+    for (let i = 0; i <= 2 * this._game.worldSizeFactor; i++) {
       this.addStaticSprite(fewerFlore);
     }
   }
@@ -183,13 +147,6 @@ module.exports = class Background {
       } else if (el.sprite instanceof PIXI.Sprite) {
         el.sprite.position.x = this.xStaticSprite(el, dt, t);
         el.sprite.position.y = el.worldY - ship.worldY;
-        if (el.moveFunction) {
-          var relativeMove = el.moveFunction(el, dt, t);
-          if (relativeMove && (typeof relativeMove === 'object')) {
-            el.sprite.position.x += relativeMove.x;
-            el.sprite.position.y += relativeMove.y;
-          }
-        }
         if (el.hittingBox) {
           let x = el.sprite.x - el.sprite.width / 2;
           let y = el.sprite.y - el.sprite.height / 2;
