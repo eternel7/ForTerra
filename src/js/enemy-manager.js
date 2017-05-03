@@ -25,6 +25,7 @@ module.exports = class EnemyManager {
     const ship = this._game.ship;
     for (let i = 0; i < this.activeEnemies.length; i++) {
       let enemy = this.activeEnemies[i];
+      enemy.enemyId = i;
       enemy.sprite.position.x = this._game.getScreenXof(enemy, dt, t);
       enemy.sprite.position.y = enemy.worldY - ship.worldY;
       if (enemy.moveFunction) {

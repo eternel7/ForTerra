@@ -13,6 +13,8 @@ module.exports = class Enemy {
     sprite.position.x = Math.random() * this._game.worldWidth * 0.8;
     sprite.position.y = (this._game.renderer.height - 350) * Math.random();
     sprite.anchor = new PIXI.Point(0.5, 0.5);
+    sprite.scale.x = 0.5;
+    sprite.scale.y = 0.5;
     this.worldX = sprite.position.x;
     this.worldY = sprite.position.y;
     this.sprite = sprite;
@@ -22,12 +24,12 @@ module.exports = class Enemy {
     this.randomNumberY = Math.round(10 * Math.random());
     this.hittingBox = {
       sprite: sprite,
-      rectangle: config.texture.frame,
+      rectangle: new PIXI.Rectangle(),
       relativeRectangle: {
-        x: 0,
-        y: 0,
-        w: 0,
-        h: 0
+        x: 7,
+        y: 10,
+        w: -14,
+        h: -20
       }
     };
     this.damage = 0;

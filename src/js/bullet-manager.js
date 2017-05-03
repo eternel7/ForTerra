@@ -69,6 +69,7 @@ module.exports = class BulletManager {
         }
         for (s = 0; s < this._game.enemyManager.activeEnemies.length; s++) {
           let enemy = this._game.enemyManager.activeEnemies[s];
+          enemy.enemyId = s;
           if(enemy.checkHit({sprite: bullet}, bullet.damage, t)) {
             this.recycleBullet(bullet, i);
           }
