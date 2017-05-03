@@ -31,7 +31,7 @@ module.exports = class BulletManager {
     bullet.duration = 0;
     bullet.maxDuration = spaceShip.weaponmaxDuration || 7000; //in milliseconds
     bullet.friction = spaceShip.weaponFriction || 0.001;
-    bullet.normalSpeed = spaceShip.weaponSpeed || 0.5 ;
+    bullet.normalSpeed = spaceShip.weaponSpeed || 3 ;
     bullet.speed = bullet.normalSpeed + Math.abs(spaceShip.vx);
     bullet.damage = spaceShip.weaponDamage || 5;
     bullet.rotation = (shipSpeedDirection >= 0) ? Math.PI / 2 : -1 * Math.PI / 2;
@@ -68,8 +68,9 @@ module.exports = class BulletManager {
           }
         }
         for (s = 0; s < this._game.enemyManager.activeEnemies.length; s++) {
-          if(this._game.enemyManager.activeEnemies[s].checkHit({sprite: bullet, enemyId: s}, bullet.damage, t)) {
-             this.recycleBullet(bullet, i);
+          let enemy = this._game.enemyManager.activeEnemies[s];
+          if(enemy.checkHit({sprite: bullet}, bullet.damage, t)) {
+            this.recycleBullet(bullet, i);
           }
         }
       }

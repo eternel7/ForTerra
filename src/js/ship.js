@@ -1,7 +1,5 @@
 const PIXI = require('pixi.js');
 const control = require('./controls');
-const Bump = require('./collision');
-const bump = new Bump();
 
 module.exports = class Ship {
 
@@ -176,16 +174,7 @@ module.exports = class Ship {
    */
   checkHit(hitbox, objectDamage, currentTime) {
     if (currentTime > this._timeLastHit + this.HIT_INTERVAL) {
-      let touched = false;
-      if (hitbox instanceof PIXI.Graphics) {
-        touched = false;
-      } else if (hitbox.rectangle instanceof PIXI.Rectangle) {
-        touched = bump.hitTestRectangle(hitbox.rectangle, this._ship);
-      } else if (hitbox.sprite instanceof PIXI.Sprite) {
-        touched = bump.rectangleCollision(this._ship, hitbox.sprite);
-      } else if (hitbox.position instanceof PIXI.Point || hitbox.position instanceof PIXI.ObservablePoint) {
-        touched = this._ship.containsPoint(hitbox.position);
-      }
+      let touched = this._game.checkHit(hitbox,this._ship);
       if (touched) {
         // Ok, we're hit. Flash red
         this._ship.tint = 0xFF0000;
@@ -287,13 +276,13 @@ module.exports = class Ship {
     } else {
       this.catchControl(dt, currentTime);
       //update texture for animation of the turn in speed
-      if (Math.abs(this.vx) > 1) {
+      if (Math.abs(this.vx) > 0.5) {
         //Tell the texture to use that rectangular section
         this.texture.frame = this.Rect.horizontal;
-      } else if (Math.abs(this.vx) > 0.5) {
+      } else if (Math.abs(this.vx) > 0.25) {
         //Tell the texture to use that rectangular section
         this.texture.frame = this.Rect.a;
-      } else if (Math.abs(this.vx) > 0.25) {
+      } else if (Math.abs(this.vx) > 0.1) {
         //Tell the texture to use that rectangular section
         this.texture.frame = this.Rect.b;
       } else {

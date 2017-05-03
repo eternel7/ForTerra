@@ -4,6 +4,8 @@ const BackGround = require('./background');
 const Ship = require('./ship');
 const BulletManager = require('./bullet-manager');
 const EnemyManager = require('./enemy-manager');
+const Bump = require('./collision');
+const bump = new Bump();
 
 /**
  * This class represents the game as a whole. It is responsible for
@@ -121,5 +123,21 @@ module.exports = class Game extends EventEmitter {
       return this.mod(sprite.position.x + sprite.width - el.depth * this.ship.vx * dt, this.worldWidth) - sprite.width;
     }
     return -50;
+  }
+
+  checkHit(hitbox1, sprite) {
+    let touched = false;
+    if (sprite instanceof PIXI.Sprite) {
+      if (hitbox1 instanceof PIXI.Graphics) {
+        touched = false;
+      } else if (hitbox1.rectangle instanceof PIXI.Rectangle) {
+        touched = bump.hitTestRectangle(hitbox1.rectangle, sprite);
+      } else if (hitbox1.sprite instanceof PIXI.Sprite) {
+        touched = bump.rectangleCollision(sprite, hitbox1.sprite);
+      } else if (hitbox1.position instanceof PIXI.Point || hitbox1.position instanceof PIXI.ObservablePoint) {
+        touched = sprite.containsPoint(hitbox1.position);
+      }
+    }
+    return touched;
   }
 }
