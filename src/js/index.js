@@ -13,7 +13,11 @@ function loadProgressHandler(loader, resource) {
 }
 
 function setup() {
-  new Game(document.body);
+  let myGame = new Game(document.getElementById("container"));
+  window.onresize = function(event) {
+    myGame.resize(event);
+  };
+  myGame.resize(0);
 }
 
 function onReady() {

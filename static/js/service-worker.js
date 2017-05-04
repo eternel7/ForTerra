@@ -1,8 +1,9 @@
 importScripts('cache-polyfill.js');
 
-var CACHE_VERSION = 'app-v1';
-var CACHE_FILES = [
-    '../../index.html'
+let CACHE_VERSION = 'app-v1';
+let CACHE_FILES = [
+    '../../index.html',
+    '../../js/app.bundle.js'
 ];
 
 self.addEventListener('install', function (event) {
@@ -39,14 +40,14 @@ self.addEventListener('fetch', function (event) {
 });
 
 function requestBackend(event){
-    var url = event.request.clone();
+    let url = event.request.clone();
     return fetch(url).then(function(res){
         //if not a valid response send the error
         if(!res || res.status !== 200 || res.type !== 'basic'){
             return res;
         }
 
-        var response = res.clone();
+        let response = res.clone();
 
         caches.open(CACHE_VERSION).then(function(cache){
             cache.put(event.request, response);

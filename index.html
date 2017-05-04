@@ -13,6 +13,13 @@
             /* make sure no scrollbar */
             background-color: #000000;
         }
+        .center {
+            margin: 0;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
     </style>
     <link rel="manifest" href="manifest.json">
 
@@ -29,6 +36,8 @@
     </script>
 </head>
 <body>
+<div id="container" class="center">
+</div>
 <script defer src="./js/app.bundle.js"></script>
 </body>
 </html>

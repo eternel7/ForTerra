@@ -88,7 +88,7 @@ module.exports = class Ship {
     this._ship.anchor = new PIXI.Point(0.5, 0.5);
     this._ship.x = this.xOffset;
     this._ship.y = this.yOffset;
-    this.worldX = Math.random() * this._game.worldWidth;
+    this.worldX = 0;
     this.worldY = this.yOffset;
     /*
      //draw hitbox for debug

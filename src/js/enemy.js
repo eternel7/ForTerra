@@ -11,7 +11,7 @@ module.exports = class Enemy {
       128);
     let sprite = new PIXI.Sprite(config.texture);
     sprite.position.x = Math.random() * this._game.worldWidth * 0.8;
-    sprite.position.y = (this._game.renderer.height - 350) * Math.random();
+    sprite.position.y = (this._game.renderer.height / 4) * Math.random();
     sprite.anchor = new PIXI.Point(0.5, 0.5);
     sprite.scale.x = 0.5;
     sprite.scale.y = 0.5;
@@ -24,7 +24,7 @@ module.exports = class Enemy {
     this.randomNumberY = Math.round(10 * Math.random());
     this.hittingBox = {
       sprite: sprite,
-      rectangle: new PIXI.Rectangle(),
+      rectangle: sprite.texture.frame.clone(),
       relativeRectangle: {
         x: 7,
         y: 10,
@@ -61,7 +61,7 @@ module.exports = class Enemy {
    * @returns {Boolean} wasHit
    */
   checkHit(hitbox, objectDamage, currentTime) {
-    let touched = this._game.checkHit(hitbox,this.sprite);
+    let touched = this._game.checkHit(hitbox, this.sprite);
     if (touched) {
       this.recycleEnemy();
       return true;
@@ -75,7 +75,7 @@ module.exports = class Enemy {
     sprite.position.x = -500;
     sprite.position.y = -500;
     sprite.rotation = 0;
-    sprite.scale.set(0,0);
+    sprite.scale.set(0, 0);
     sprite.damage = 0;
     if (this.hitbox instanceof PIXI.Graphics) {
       this.hitbox.clear();

@@ -70,6 +70,7 @@ module.exports = class Game extends EventEmitter {
       parent: _this,
       color: false //"0xff0000"
     });
+
     this.spaceShips = [];
     this.spaceShips.push(this.ship);
 
@@ -145,5 +146,20 @@ module.exports = class Game extends EventEmitter {
       }
     }
     return touched;
+  }
+  resize(event) {
+    let size = [1920, 1080];
+    let ratio = size[0] / size[1];
+    let w = 0;
+    let h = 0;
+    if (window.innerWidth / window.innerHeight >= ratio) {
+      w = window.innerHeight * ratio;
+      h = window.innerHeight;
+    } else {
+      w = window.innerWidth;
+      h = window.innerWidth / ratio;
+    }
+    this.renderer.view.style.width = w + 'px';
+    this.renderer.view.style.height = h + 'px';
   }
 }
