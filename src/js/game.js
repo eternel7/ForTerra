@@ -114,6 +114,12 @@ module.exports = class Game extends EventEmitter {
     return ret;
   }
 
+  pad(n, width, z) {
+    z = z || '0';
+    n = n + '';
+    return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+  }
+
   getScreenXof(el, dt, t) {
     let sprite = (el instanceof PIXI.Sprite) ? el : el.sprite;
     if (this.ship instanceof Ship && sprite instanceof PIXI.Sprite &&

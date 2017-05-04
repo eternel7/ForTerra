@@ -1,13 +1,8 @@
 const PIXI = require('pixi.js');
 const control = require('./controls');
+const Explosion = require('./explosion');
 
 module.exports = class Ship {
-
-  pad(n, width, z) {
-    z = z || '0';
-    n = n + '';
-    return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
-  }
 
   constructor(config) {
 
@@ -136,12 +131,7 @@ module.exports = class Ship {
     this.lifeBarContainer.position.y = this._game.renderer.height - this.lifeBarContainer.height - 15;
 
     //manage explosion animation
-    this.explosions = [];
-    this.explosionSteps = 31;
-    for (let i = 0; i <= this.explosionSteps; i++) {
-      this.explosions.push(PIXI.utils.TextureCache["expl_06_00" + this.pad(i, 2, '0') + ".png"]);
-    }
-    this.explosion = new PIXI.extras.AnimatedSprite(this.explosions);
+    this.explosion = new Explosion({parent : this._game});
 
     this.stage.addChild(this._ship, this.lifeBarContainer);
   }
@@ -155,7 +145,7 @@ module.exports = class Ship {
       this.lifeBarGauge.beginFill("0x" + r.toString(16) + g.toString(16) + "00");
       // draw a rectangle
       this.lifeBarGauge.drawRect(this.lifeBarX, 14, Math.floor(this.lifeBarWidthMax * f), 24);
-      this.lifeBarTextStyle.fill = ['#ffffff', '#' + this.pad(r.toString(16), 2, '0') + this.pad(g.toString(16), 2, '0') + '00'];
+      this.lifeBarTextStyle.fill = ['#ffffff', '#' + this._game.pad(r.toString(16), 2, '0') + this._game.pad(g.toString(16), 2, '0') + '00'];
       this.lifeBarText.text = this.health + "/" + this.MAX_HEALTH;
       this.lifeBarText.position.x = Math.floor(this.lifeBarContainer.width / 2 - this.lifeBarText.width / 2);
     } else {
@@ -168,6 +158,7 @@ module.exports = class Ship {
    *
    * @param   {object} hitbox
    * @param   {Number} objectDamage
+   * @param   {Number} currentTime
    *
    * @public
    * @returns {Boolean} wasHit
@@ -318,4 +309,4 @@ module.exports = class Ship {
       }
     }
   }
-}
+};

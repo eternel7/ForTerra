@@ -32,7 +32,7 @@ module.exports = class Enemy {
         h: -20
       }
     };
-    this.damage = 0;
+    this.damage = 10;
     this._timeLastHit = 0;
     this.HIT_INTERVAL = 200;
     //this.hitbox = new PIXI.Graphics();
@@ -55,6 +55,7 @@ module.exports = class Enemy {
    *
    * @param   {object} hitbox
    * @param   {Number} objectDamage
+   * @param   {Number} currentTime
    *
    * @public
    * @returns {Boolean} wasHit
