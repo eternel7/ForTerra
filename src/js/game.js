@@ -44,6 +44,7 @@ module.exports = class Game extends EventEmitter {
     this.renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight, {transparent: true}, false);
 
     // append the canvas created by the renderer to our DOM element
+    this._element.innerHTML= "";
     this._element.appendChild(this.renderer.view);
 
     // Frames are distributed unevenly - let's keep track of how much time has passed since the last one
