@@ -1,4 +1,5 @@
 const PIXI = require('pixi.js');
+const Movingsprite = require('./models/movingSprite');
 
 module.exports = class BulletManager {
   constructor(config) {
@@ -19,19 +20,19 @@ module.exports = class BulletManager {
     }
 
     let bullet = this._passiveBullets.pop();
-    bullet.position.x = x;
-    bullet.position.y = y;
+    bullet.sprite.position.x = x;
+    bullet.sprite.position.y = y;
     bullet.worldX = spaceShip.worldX;
     bullet.worldY = spaceShip.worldY;
     bullet.distX = 0;
-    bullet.maxDist = spaceShip.weaponMaxDist || 100000;
+    bullet.maxDist = spaceShip.weaponMaxDist || this._game.worldWidth * 0.5;
     bullet.duration = 0;
-    bullet.maxDuration = spaceShip.weaponmaxDuration || 7000; //in milliseconds
+    bullet.maxDuration = spaceShip.weaponmaxDuration || 5000; //in milliseconds
     bullet.friction = spaceShip.weaponFriction || 0.001;
     bullet.normalSpeed = spaceShip.weaponSpeed || 3 ;
     bullet.speed = bullet.normalSpeed + Math.abs(spaceShip.vx);
     bullet.damage = spaceShip.weaponDamage || 5;
-    bullet.rotation = (shipSpeedDirection >= 0) ? Math.PI / 2 : -1 * Math.PI / 2;
+    bullet.sprite.rotation = (shipSpeedDirection >= 0) ? Math.PI / 2 : -1 * Math.PI / 2;
     bullet.source = spaceShip;
     this._activeBullets.push(bullet);
   }
@@ -42,7 +43,7 @@ module.exports = class BulletManager {
     for (i = 0; i < this._activeBullets.length; i++) {
       bullet = this._activeBullets[i];
       bullet.speed = Math.max(bullet.speed - bullet.friction, bullet.normalSpeed);
-      let distX = Math.sin(bullet.rotation) * bullet.speed * dt;
+      let distX = Math.sin(bullet.sprite.rotation) * bullet.speed * dt;
       bullet.distX += Math.abs(distX);
       bullet.duration += dt;
       if (bullet.distX > bullet.maxDist ||
@@ -50,24 +51,20 @@ module.exports = class BulletManager {
         // Bullet made the max distance it could, time to recycle it
         this.recycleBullet(bullet, i);
       } else {
-        let el = {
-          sprite: bullet,
-          depth: 1
-        };
-        bullet.position.x = this._game.getScreenXof(el, dt, t) + distX;
+        bullet.sprite.position.x = this._game.getScreenXof(bullet, dt, t) + distX;
         // Bullet is still on stage, let's perform hit detection
         for (s = 0; s < this._game.spaceShips.length; s++) {
           if (this._game.spaceShips[s] === bullet.source) {
             continue;
           }
-          if (this._game.spaceShips[s].checkHit({sprite: bullet}, bullet.damage, t)) {
+          if (this._game.spaceShips[s].checkHit({sprite: bullet.sprite}, bullet.damage, t)) {
             this.recycleBullet(bullet, i);
           }
         }
         for (s = 0; s < this._game.enemyManager.activeEnemies.length; s++) {
           let enemy = this._game.enemyManager.activeEnemies[s];
           enemy.enemyId = s;
-          if(enemy.checkHit({sprite: bullet}, bullet.damage, t)) {
+          if(enemy.checkHit({sprite: bullet.sprite}, bullet.damage, t)) {
             this.recycleBullet(bullet, i);
           }
         }
@@ -76,23 +73,24 @@ module.exports = class BulletManager {
   }
 
   recycleBullet(bullet, i) {
-    bullet.position.x = -50;
-    bullet.position.y = -50;
-    bullet.rotation = 0;
+    bullet.sprite.position.x = -50;
+    bullet.sprite.position.y = -50;
+    bullet.sprite.rotation = 0;
     bullet.source = null;
     this._activeBullets.splice(i, 1);
     this._passiveBullets.push(bullet);
   }
 
   createBullet() {
-    let bullet = new PIXI.Sprite(this.texture);
-    bullet.position.x = -50;
-    bullet.position.y = -50;
-    bullet.anchor.x = 0.5;
-    bullet.anchor.y = 0.5;
-    bullet.rotation = 0;
+    let bullet = new Movingsprite({parent : this._game});
+    bullet.setSprite(new PIXI.Sprite(this.texture));
+    bullet.sprite.position.x = -50;
+    bullet.sprite.position.y = -50;
+    bullet.sprite.anchor.x = 0.5;
+    bullet.sprite.anchor.y = 0.5;
+    bullet.sprite.rotation = 0;
     this._passiveBullets.push(bullet);
     //drawing bullet
-    this._game.stage.addChild(bullet);
+    this._game.stage.addChild(bullet.sprite);
   }
 }

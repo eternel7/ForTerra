@@ -17,4 +17,15 @@ module.exports = class Movingsprite {
     this.sprite.position.x += dt * this.vx;
     this.sprite.position.y += dt * this.vy;
   }
+
+  getScreenXof(el, dt, t) {
+    let sprite = (el instanceof PIXI.Sprite) ? el : el.sprite;
+    if (this.ship instanceof Ship && sprite instanceof PIXI.Sprite &&
+      (typeof el.depth === 'number') && (typeof sprite.position.x === 'number')) {
+      //World is round sprite can be be nearer left or right
+      //take width of sprite as margin to not make it disappear once it touch a border of the screen
+      return this.mod(sprite.position.x + sprite.width - el.depth * this.ship.vx * dt, this.worldWidth) - sprite.width;
+    }
+    return -50;
+  }
 };
