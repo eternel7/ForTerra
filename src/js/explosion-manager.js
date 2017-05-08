@@ -51,6 +51,7 @@ module.exports = class ExplosionManager {
   }
 
   move(el, dt, t) {
+    //TODO : move of explosion should be relative to ship speed
     let def = {x: 0, y: 1};
     if(el.sprite.relativeMove && el.sprite.startTime){
       def.y += el.sprite.relativeMove.y/10;
@@ -85,6 +86,5 @@ module.exports = class ExplosionManager {
     explosion.position.y = -500;
     explosion.rotation = 0;
     explosion.scale.set(0, 0);
-    //explosion.destroy();
   }
 };

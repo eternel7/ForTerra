@@ -11,7 +11,12 @@ module.exports = class EnemyManager {
     this.activeEnemies = [];
     this.passiveEnemies = [];
     this.initialEnemies = config.initialEnemies || 10;
-    this.texture = (config.texture || PIXI.utils.TextureCache["asteroids"]);
+    this.texture = (config.texture || PIXI.utils.TextureCache["ships"]);
+    this.texture = this.texture.clone();
+    this.texture.frame = new PIXI.Rectangle(2456,
+      370,
+      132,
+      80);
     //Moving sprites : enemies
     for (let i = 0; i <= this.initialEnemies; i++) {
       this.createEnemy({
@@ -65,7 +70,9 @@ module.exports = class EnemyManager {
   }
 
   createEnemy(config) {
-    let enemy = new Enemy({parent: this._game, texture: config.texture});
+    let enemy = new Enemy({
+      parent: this._game,
+      texture: config.texture});
     this.activeEnemies.push(enemy);
     enemy.enemyId = this.activeEnemies.length - 1;
   }

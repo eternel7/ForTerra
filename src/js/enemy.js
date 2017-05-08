@@ -1,21 +1,16 @@
 const PIXI = require('pixi.js');
-const Explosion = require('./explosion');
 
 module.exports = class Enemy {
 
   constructor(config) {
     this._game = config.parent;
     this.enemyId = undefined; //unknown place in this._game.enemyManager.activeEnemies
-    config.texture.frame = new PIXI.Rectangle(0,
-      0,
-      128,
-      128);
     let sprite = new PIXI.Sprite(config.texture);
     sprite.position.x = Math.random() * this._game.worldWidth * 0.8;
     sprite.position.y = (this._game.renderer.height / 4) * Math.random();
     sprite.anchor = new PIXI.Point(0.5, 0.5);
-    sprite.scale.x = 0.5;
-    sprite.scale.y = 0.5;
+    sprite.scale.x = 1;
+    sprite.scale.y = 1;
     this.worldX = sprite.position.x;
     this.worldY = sprite.position.y;
     this.sprite = sprite;
@@ -48,7 +43,7 @@ module.exports = class Enemy {
 
 
   move(el, dt, t) {
-    el.sprite.rotation = Math.min(1, el.randomNumberX) * t / 1000 + el.randomNumberX;
+    //el.sprite.rotation = Math.min(1, el.randomNumberX) * t / 1000 + el.randomNumberX;
     return {
       x: (el.randomNumberSpeed > 0.5) ? el.randomNumberX + 1 : -1 * el.randomNumberX - 1,
       y: Math.cos(t / 1000) * 50 + this.randomNumberY * t / 1000
@@ -77,7 +72,7 @@ module.exports = class Enemy {
   recycleEnemy() {
     let i = this.enemyId;
     let sprite = this.sprite;
-    this._game.explosionManager.spriteExplode(sprite, {explosionName: "puff_smoke_01_00", el: this});
+    this._game.explosionManager.spriteExplode(sprite, {explosionName: "expl_11_00", el: this});
     sprite.position.x = -500;
     sprite.position.y = -500;
     sprite.rotation = 0;
