@@ -242,7 +242,7 @@ module.exports = class Ship {
     if (control.isDown(control.SPACE)) {
       if (currentTime > this._timeLastBulletFired + this.FIRE_INTERVAL) {
         //shooting a bullet
-        this._game.bulletManager.add(this._ship.x, this._ship.y, this.vx, this);
+        this._game.bulletManager.add(this._ship.x, this._ship.y, (this.vx>=0) ? 1 : -1, this);
         this._timeLastBulletFired = currentTime;
       }
     }

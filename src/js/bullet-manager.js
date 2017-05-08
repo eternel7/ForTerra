@@ -14,7 +14,7 @@ module.exports = class BulletManager {
     }
   }
 
-  add(x, y, shipSpeedDirection, spaceShip) {
+  add(x, y, rotation, spaceShip) {
     if (this._passiveBullets.length === 0) {
       this.createBullet();
     }
@@ -30,9 +30,10 @@ module.exports = class BulletManager {
     bullet.maxDuration = spaceShip.weaponmaxDuration || 5000; //in milliseconds
     bullet.friction = spaceShip.weaponFriction || 0.001;
     bullet.normalSpeed = spaceShip.weaponSpeed || 3 ;
-    bullet.speed = bullet.normalSpeed + Math.abs(spaceShip.vx);
+    bullet.vx = bullet.normalSpeed + Math.abs(spaceShip.vx);
+    bullet.vy= 0;
     bullet.damage = spaceShip.weaponDamage || 5;
-    bullet.sprite.rotation = (shipSpeedDirection >= 0) ? Math.PI / 2 : -1 * Math.PI / 2;
+    bullet.sprite.rotation = rotation;
     bullet.source = spaceShip;
     this._activeBullets.push(bullet);
   }
@@ -42,8 +43,8 @@ module.exports = class BulletManager {
 
     for (i = 0; i < this._activeBullets.length; i++) {
       bullet = this._activeBullets[i];
-      bullet.speed = Math.max(bullet.speed - bullet.friction, bullet.normalSpeed);
-      let distX = Math.sin(bullet.sprite.rotation) * bullet.speed * dt;
+      bullet.vx = Math.max(bullet.vx - bullet.friction, bullet.normalSpeed);
+      let distX = Math.sin(bullet.sprite.rotation) * bullet.vx * dt;
       bullet.distX += Math.abs(distX);
       bullet.duration += dt;
       if (bullet.distX > bullet.maxDist ||
@@ -51,7 +52,7 @@ module.exports = class BulletManager {
         // Bullet made the max distance it could, time to recycle it
         this.recycleBullet(bullet, i);
       } else {
-        bullet.sprite.position.x = this._game.getScreenXof(bullet, dt, t) + distX;
+        bullet.move(bullet,dt,t);
         // Bullet is still on stage, let's perform hit detection
         for (s = 0; s < this._game.spaceShips.length; s++) {
           if (this._game.spaceShips[s] === bullet.source) {
@@ -86,9 +87,6 @@ module.exports = class BulletManager {
     bullet.setSprite(new PIXI.Sprite(this.texture));
     bullet.sprite.position.x = -50;
     bullet.sprite.position.y = -50;
-    bullet.sprite.anchor.x = 0.5;
-    bullet.sprite.anchor.y = 0.5;
-    bullet.sprite.rotation = 0;
     this._passiveBullets.push(bullet);
     //drawing bullet
     this._game.stage.addChild(bullet.sprite);
