@@ -33,8 +33,8 @@ PIXI.loader.add([
   {name: "UIBar01", url: "static/resources/images/backgrounds/UIBar01.png"},
   {name: "ships", url: "static/resources/images/ships/wc2ships_sheet.png"},
   {name: "planetsSpritesheet", url: "static/resources/images/space/planets.json"},
-  {name: 'bullets', url: 'static/resources/images/shoots/beams.png'},
-  {name: 'asteroids', url: 'static/resources/images/space/asteroid_strip64.png'}
+  {name: 'asteroids', url: 'static/resources/images/space/asteroid_strip64.png'},
+  {name: 'gameOver', url: 'static/resources/images/gameOver.png'}
 
 ])
   .on("progress", loadProgressHandler.bind(this))

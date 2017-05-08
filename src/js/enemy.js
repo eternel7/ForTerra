@@ -34,7 +34,7 @@ module.exports = class Enemy {
         h: -20
       }
     };
-    this.damage = 10;
+    this.damage = 50;
     this._timeLastHit = 0;
     this.HIT_INTERVAL = 200;
     //this.hitbox = new PIXI.Graphics();

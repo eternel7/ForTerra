@@ -37,7 +37,8 @@ module.exports = class Ship {
     // Time that passes between shots
     this.FIRE_INTERVAL = 500;
     this.HIGHLIGHT_INTERVAL = 100;
-
+    this.GAMEOVER_INTERVAL = 2000;
+    this.GAMEOVER_ANIMATION_DURATION = 5000;
     //ship size and position in sprite sheet
     this.sprites = {
       horizontal: {
@@ -131,7 +132,7 @@ module.exports = class Ship {
     this.lifeBarContainer.position.y = this._game.renderer.height - this.lifeBarContainer.height - 15;
 
     //manage explosion animation
-    this.explosion = new Explosion({parent : this._game});
+    this.explosion = new Explosion({parent: this._game});
 
     this.stage.addChild(this._ship, this.lifeBarContainer);
   }
@@ -165,7 +166,7 @@ module.exports = class Ship {
    */
   checkHit(hitbox, objectDamage, currentTime) {
     if (currentTime > this._timeLastHit + this.HIT_INTERVAL) {
-      let touched = this._game.checkHit(hitbox,this._ship);
+      let touched = this._game.checkHit(hitbox, this._ship);
       if (touched) {
         // Ok, we're hit. Flash red
         this._ship.tint = 0xFF0000;
@@ -242,7 +243,7 @@ module.exports = class Ship {
     if (control.isDown(control.SPACE)) {
       if (currentTime > this._timeLastBulletFired + this.FIRE_INTERVAL) {
         //shooting a bullet
-        this._game.bulletManager.add(this._ship.x, this._ship.y, (this.vx>=0) ? 1 : -1, this);
+        this._game.bulletManager.add(this._ship.x, this._ship.y, (this.vx >= 0) ? 1 : -1, this);
         this._timeLastBulletFired = currentTime;
       }
     }
@@ -250,6 +251,34 @@ module.exports = class Ship {
       this.accelerate(true, dt, currentTime);
     } else if (control.isDown(control.DECELERATE)) {
       this.accelerate(false, dt, currentTime);
+    }
+  }
+
+  addGameOver(currentTime) {
+    this.gameOver = new PIXI.Sprite(PIXI.utils.TextureCache["gameOver"]);
+    this.gameOver.anchor = new PIXI.Point(0.5, 0.5);
+    this.gameOver.position.x = -500;
+    this.gameOver.position.y = -500;
+    this.gameOver.scale.x = 0;
+    this.gameOverTime = currentTime;
+    this.endTime = this.gameOverTime + this.GAMEOVER_INTERVAL + this.GAMEOVER_ANIMATION_DURATION;
+    this._game.stage.addChild(this.gameOver);
+
+  }
+
+  displayGameOver(dt, currentTime) {
+    this.gameOver.position.x = (this._game.renderer.width) / 2;
+    this.gameOver.position.y = (this._game.renderer.height - this.gameOver.height) / 2;
+    if (currentTime < this.endTime) {
+      let timeFactor = 1 - ((this.endTime - currentTime) / this.GAMEOVER_ANIMATION_DURATION);
+      this.gameOver.scale.x = timeFactor;
+      this.gameOver.rotation = timeFactor * 6 * Math.PI;
+    } else {
+      this.gameOver.scale.x = 1;
+      this.gameOver.rotation = 0;
+    }
+    if(currentTime > this.endTime+ this.GAMEOVER_INTERVAL){
+      this.state = -2;
     }
   }
 
@@ -264,7 +293,12 @@ module.exports = class Ship {
       this.health = 0;
       this.vx = 0;
       this.vy = 0;
-    } else {
+      if (!this.gameOverTime) {
+        this.addGameOver(currentTime);
+      } else if (currentTime > this.gameOverTime + this.GAMEOVER_INTERVAL) {
+        this.displayGameOver(dt, currentTime);
+      }
+    } else if (this.state >= 0 ) {
       this.catchControl(dt, currentTime);
       //update texture for animation of the turn in speed
       if (Math.abs(this.vx) > 0.5) {
