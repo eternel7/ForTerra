@@ -14,7 +14,6 @@ const bump = new Bump();
  * and adding and removing players
  */
 module.exports = class Game extends EventEmitter {
-
   /**
    * Creates the game
    *

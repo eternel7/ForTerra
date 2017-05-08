@@ -15,8 +15,10 @@ module.exports = class Ship {
     this.renderer = config.parent.renderer;
     this.shipColor = config.color || false;
     this.count = 0;
-    this.xOffset = config.xOffset || Math.floor(this.renderer.width / 2);
-    this.yOffset = config.yOffset || Math.floor(this.renderer.height / 4);
+    this.startXOffset = config.xOffset || Math.floor(this.renderer.width / 2);
+    this.xOffset = this.startXOffset;
+    this.startYOffset = config.yOffset || Math.floor(this.renderer.height / 4);
+    this.yOffset = this.startYOffset;
     this.depth = 1;
     this._timeLastHit = 0;
     this.HIT_INTERVAL = 200;
@@ -131,8 +133,6 @@ module.exports = class Ship {
     this.lifeBarContainer.position.x = Math.round((this._game.renderer.width - this.lifeBarContainer.width) / 2);
     this.lifeBarContainer.position.y = this._game.renderer.height - this.lifeBarContainer.height - 15;
 
-    //manage explosion animation
-    this.explosion = new Explosion({parent: this._game});
 
     this.stage.addChild(this._ship, this.lifeBarContainer);
   }
@@ -178,17 +178,13 @@ module.exports = class Ship {
         if (this.health <= 0) {
           // oh dear, we're dead
           this.state = -1;
-          this.explosion.position.x = this._ship.position.x;
-          this.explosion.position.y = this._ship.position.y;
+
+          this._game.explosionManager.spriteExplode(this._ship,{
+            explosionName: "expl_06_00",
+            el: this,
+            animationSpeed: 0.3});
           this._ship.position.x = -50;
           this._ship.position.y = -50;
-          this.explosion.anchor.x = 0.5;
-          this.explosion.anchor.y = 0.5;
-          this.explosion.rotation = 0;
-          this.explosion.animationSpeed = 0.3;
-          this.explosion.loop = false;
-          this._game.stage.addChild(this.explosion);
-          this.explosion.play();
           this.updateLifeBarStyle();
         } else {
           // still alive, but taken some damage. Update text color from green to red
@@ -254,16 +250,29 @@ module.exports = class Ship {
     }
   }
 
+  restart() {
+    this.restartTime = performance.now();
+    this.state = 1;
+    this.gameOver.position.x = -500;
+    this.gameOver.position.y = -500;
+    this.gameOver.scale.x = 0;
+    this.xOffset = this.startXOffset;
+    this.yOffset = this.startYOffset;
+    this.health = this.MAX_HEALTH;
+    this.gameOverTime = 0;
+    this.endTime = 0;
+  }
+
   addGameOver(currentTime) {
     this.gameOver = new PIXI.Sprite(PIXI.utils.TextureCache["gameOver"]);
     this.gameOver.anchor = new PIXI.Point(0.5, 0.5);
     this.gameOver.position.x = -500;
     this.gameOver.position.y = -500;
     this.gameOver.scale.x = 0;
-    this.gameOverTime = currentTime;
-    this.endTime = this.gameOverTime + this.GAMEOVER_INTERVAL + this.GAMEOVER_ANIMATION_DURATION;
+    this.gameOver.interactive = true;
+    this.gameOver.buttonMode = true;
+    this.gameOver.on('pointerdown', this.restart.bind(this));
     this._game.stage.addChild(this.gameOver);
-
   }
 
   displayGameOver(dt, currentTime) {
@@ -295,8 +304,13 @@ module.exports = class Ship {
       this.health = 0;
       this.vx = 0;
       this.vy = 0;
-      if (!this.gameOverTime) {
+      if (!this.gameOver) {
+        //add game over sprite if needed
         this.addGameOver(currentTime);
+      } else if (!this.gameOverTime){
+        //set  game over timing
+        this.gameOverTime = currentTime;
+        this.endTime = this.gameOverTime + this.GAMEOVER_INTERVAL + this.GAMEOVER_ANIMATION_DURATION;
       } else if (currentTime > this.gameOverTime + this.GAMEOVER_INTERVAL) {
         this.displayGameOver(dt, currentTime);
       }

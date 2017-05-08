@@ -40,8 +40,8 @@ module.exports = class ExplosionManager {
     this.explosion.loop = false;
     if (config.el && config.el.move) {
       this.explosion.relativeMove = config.el.move(config.el, 1, 1);
-      this.explosion.relativeMove.x += this._game.ship.vx;
-      this.explosion.relativeMove.y += this._game.ship.vy;
+      this.explosion.relativeMove.x -= this._game.ship.vx;
+      this.explosion.relativeMove.y -= this._game.ship.vy;
     }
     this._game.stage.addChild(this.explosion);
     this.explosion.startTime = window.performance.now();
