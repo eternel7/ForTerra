@@ -268,16 +268,18 @@ module.exports = class Ship {
 
   displayGameOver(dt, currentTime) {
     this.gameOver.position.x = (this._game.renderer.width) / 2;
-    this.gameOver.position.y = (this._game.renderer.height - this.gameOver.height) / 2;
     if (currentTime < this.endTime) {
       let timeFactor = 1 - ((this.endTime - currentTime) / this.GAMEOVER_ANIMATION_DURATION);
+      this.gameOver.position.y = timeFactor * (this._game.renderer.height - this.gameOver.height) / 2;
       this.gameOver.scale.x = timeFactor;
-      this.gameOver.rotation = timeFactor * 6 * Math.PI;
+      this.gameOver.scale.y = timeFactor;
+      //this.gameOver.rotation = timeFactor * 6 * Math.PI;
     } else {
       this.gameOver.scale.x = 1;
+      this.gameOver.scale.y = 1;
       this.gameOver.rotation = 0;
     }
-    if(currentTime > this.endTime+ this.GAMEOVER_INTERVAL){
+    if (currentTime > this.endTime + this.GAMEOVER_INTERVAL) {
       this.state = -2;
     }
   }
@@ -298,7 +300,7 @@ module.exports = class Ship {
       } else if (currentTime > this.gameOverTime + this.GAMEOVER_INTERVAL) {
         this.displayGameOver(dt, currentTime);
       }
-    } else if (this.state >= 0 ) {
+    } else if (this.state >= 0) {
       this.catchControl(dt, currentTime);
       //update texture for animation of the turn in speed
       if (Math.abs(this.vx) > 0.5) {
