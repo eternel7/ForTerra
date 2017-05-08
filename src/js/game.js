@@ -4,6 +4,7 @@ const BackGround = require('./background');
 const Ship = require('./ship');
 const BulletManager = require('./bullet-manager');
 const EnemyManager = require('./enemy-manager');
+const ExplosionManager = require('./explosion-manager');
 const Bump = require('./collision');
 const bump = new Bump();
 
@@ -44,7 +45,7 @@ module.exports = class Game extends EventEmitter {
     this.renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight, {transparent: true}, false);
 
     // append the canvas created by the renderer to our DOM element
-    this._element.innerHTML= "";
+    this._element.innerHTML = "";
     this._element.appendChild(this.renderer.view);
 
     // Frames are distributed unevenly - let's keep track of how much time has passed since the last one
@@ -79,7 +80,9 @@ module.exports = class Game extends EventEmitter {
       parent: _this,
       initialBullets: 10
     });
-
+    this.explosionManager = new ExplosionManager({
+      parent: _this
+    });
     // On the next frame, the show begins
     requestAnimationFrame(this._tick.bind(this));
   }
@@ -148,6 +151,7 @@ module.exports = class Game extends EventEmitter {
     }
     return touched;
   }
+
   resize(event) {
     let size = [1920, 1080];
     let ratio = size[0] / size[1];

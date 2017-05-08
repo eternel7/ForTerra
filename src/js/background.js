@@ -74,23 +74,9 @@ module.exports = class Background {
     this.stage.addChild(this.sky, this.bg);
 
     //Add a planet pin point in the sky
-    const planets = PIXI.loader.resources["planetsSpritesheet"].textures;
-    let planet = new PIXI.Sprite(planets["planet" + Math.round(Math.random() * 20) + ".png"]);
-    planet.anchor = new PIXI.Point(0.5, 0.5);
-    let planetModel = new Planet();
-    planet.scale.x = planetModel.scale;
-    planet.scale.y = planetModel.scale;
-    planet.position.x = Math.random() * this._game.renderer.width - planet.width;
-    planet.position.y = Math.random() * 150 + 300;
-    this.backgrounds.push({
-      sprite: planet,
-      depth: 0.05,
-      worldX: planet.position.x,
-      worldY: planet.position.y,
-      damage: 0,
-      moveFunction: planetModel.moveFunction
-    });
-    this.stage.addChild(planet);
+    let planet = new Planet({game: this._game});
+    this.backgrounds.push(planet);
+    this.stage.addChild(planet.sprite);
 
     //World ground
     this.groundSrpite = new PIXI.Graphics();
@@ -147,6 +133,13 @@ module.exports = class Background {
       } else if (el.sprite instanceof PIXI.Sprite) {
         el.sprite.position.x = this.xStaticSprite(el, dt, t);
         el.sprite.position.y = el.worldY - ship.worldY;
+        if (el.move) {
+          let relativeMove = el.move(el, dt, t);
+          if (relativeMove && (typeof relativeMove === 'object')) {
+            el.sprite.position.x += relativeMove.x;
+            el.sprite.position.y += relativeMove.y;
+          }
+        }
         if (el.hittingBox) {
           let x = el.sprite.x - el.sprite.width / 2;
           let y = el.sprite.y - el.sprite.height / 2;

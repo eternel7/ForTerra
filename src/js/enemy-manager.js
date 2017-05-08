@@ -28,8 +28,8 @@ module.exports = class EnemyManager {
       enemy.enemyId = i;
       enemy.sprite.position.x = this._game.getScreenXof(enemy, dt, t);
       enemy.sprite.position.y = enemy.worldY - ship.worldY;
-      if (enemy.moveFunction) {
-        let relativeMove = enemy.moveFunction(enemy, dt, t);
+      if (enemy.move) {
+        let relativeMove = enemy.move(enemy, dt, t);
         if (relativeMove && (typeof relativeMove === 'object')) {
           enemy.sprite.position.x += relativeMove.x;
           enemy.sprite.position.y += relativeMove.y;

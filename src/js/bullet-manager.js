@@ -6,11 +6,8 @@ module.exports = class BulletManager {
     this._game.on('update', this.update.bind(this));
     this._activeBullets = [];
     this._passiveBullets = [];
-    this.texture = (config.texture || PIXI.utils.TextureCache["bullets"]);
-    this.texture.frame = new PIXI.Rectangle(309,
-      263,
-      16,
-      16);
+    this.texture = (config.texture || PIXI.utils.TextureCache["bullet_purple0004.png"]);
+    //this.texture.frame = new PIXI.Rectangle(309, 263, 16, 16);
     for (var i = 0; i < config.initialBullets; i++) {
       this.createBullet();
     }

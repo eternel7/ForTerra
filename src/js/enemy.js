@@ -1,4 +1,5 @@
 const PIXI = require('pixi.js');
+const Explosion = require('./explosion');
 
 module.exports = class Enemy {
 
@@ -46,9 +47,12 @@ module.exports = class Enemy {
   }
 
 
-  moveFunction(el, dt, t) {
+  move(el, dt, t) {
     el.sprite.rotation = Math.min(1, el.randomNumberX) * t / 1000 + el.randomNumberX;
-    return {x: (el.randomNumberSpeed>0.5) ? el.randomNumberX + 1 : -1*el.randomNumberX - 1, y: Math.cos(t / 1000) * 50 + this.randomNumberY * t / 1000};
+    return {
+      x: (el.randomNumberSpeed > 0.5) ? el.randomNumberX + 1 : -1 * el.randomNumberX - 1,
+      y: Math.cos(t / 1000) * 50 + this.randomNumberY * t / 1000
+    };
   }
 
   /**
@@ -73,6 +77,7 @@ module.exports = class Enemy {
   recycleEnemy() {
     let i = this.enemyId;
     let sprite = this.sprite;
+    this._game.explosionManager.spriteExplode(sprite, {explosionName: "puff_smoke_01_00", el: this});
     sprite.position.x = -500;
     sprite.position.y = -500;
     sprite.rotation = 0;
