@@ -1,5 +1,5 @@
 const PIXI = require('pixi.js');
-const Movingsprite = require('./models/movingSprite');
+const MovingSprite = require('./models/movingSprite');
 
 module.exports = class BulletManager {
   constructor(config) {
@@ -83,7 +83,7 @@ module.exports = class BulletManager {
   }
 
   createBullet() {
-    let bullet = new Movingsprite({parent : this._game});
+    let bullet = new MovingSprite({parent : this._game});
     bullet.setSprite(new PIXI.Sprite(this.texture));
     bullet.sprite.position.x = -50;
     bullet.sprite.position.y = -50;

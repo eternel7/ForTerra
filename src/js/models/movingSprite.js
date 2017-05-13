@@ -1,8 +1,8 @@
 const PIXI = require('pixi.js');
 
-module.exports = class Movingsprite {
+module.exports = class MovingSprite {
   constructor(config) {
-    this._game = config.game;
+    this._game = config.parent;
     this.sprite = undefined;
     this.vx = 1 / 50;
     this.vy = 0;

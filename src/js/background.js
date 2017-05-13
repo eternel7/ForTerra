@@ -74,7 +74,7 @@ module.exports = class Background {
     this.stage.addChild(this.sky, this.bg);
 
     //Add a planet pin point in the sky
-    let planet = new Planet({game: this._game});
+    let planet = new Planet({parent: this._game});
     this.backgrounds.push(planet);
     this.stage.addChild(planet.sprite);
 

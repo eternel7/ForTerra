@@ -31,33 +31,29 @@ module.exports = class ExplosionManager {
       explosionSteps: explosionNameInfo[config.explosionName].steps
     });
 
-    this.explosion.position.x = sprite.position.x;
-    this.explosion.position.y = sprite.position.y;
-    this.explosion.anchor.x = 0.5;
-    this.explosion.anchor.y = 0.5;
-    this.explosion.rotation = config.rotation || sprite.rotation;
-    this.explosion.animationSpeed = config.animationSpeed || 0.3;
-    this.explosion.loop = false;
+    this.explosion.sprite.position.x = sprite.position.x;
+    this.explosion.sprite.position.y = sprite.position.y;
+    this.explosion.sprite.anchor.x = 0.5;
+    this.explosion.sprite.anchor.y = 0.5;
+    this.explosion.sprite.rotation = config.rotation || sprite.rotation;
+    this.explosion.sprite.animationSpeed = config.animationSpeed || 0.3;
+    this.explosion.sprite.loop = false;
     if (config.el && config.el.move) {
       this.explosion.relativeMove = config.el.move(config.el, 1, 1);
       this.explosion.relativeMove.x -= this._game.ship.vx;
       this.explosion.relativeMove.y -= this._game.ship.vy;
     }
-    this._game.stage.addChild(this.explosion);
+    this._game.stage.addChild(this.explosion.sprite);
     this.explosion.startTime = window.performance.now();
     this.explosion.duration = explosionNameInfo[config.explosionName].duration || 5000;
-    this.explosion.play();
+    this.explosion.sprite.play();
     this._activeExplosions.push(this.explosion);
   }
 
   move(el, dt, t) {
     //TODO : move of explosion should be relative to ship speed
-    let def = {x: 0, y: 1};
-    if(el.sprite.relativeMove && el.sprite.startTime){
-      def.y += el.sprite.relativeMove.y/10;
-      def.x += el.sprite.relativeMove.x;
-    }
-    return def;
+    el.sprite.position.x += dt * el.vx * el.depth * Math.sin(el.sprite.rotation);
+    el.sprite.position.y += dt * el.vy * el.depth * Math.cos(el.sprite.rotation);
   }
 
   update(dt, currentTime) {
@@ -68,13 +64,8 @@ module.exports = class ExplosionManager {
       if (explosion && currentTime > explosion.startTime + explosion.duration * explosion.animationSpeed) {
         this.recycle(explosion, i);
       }
-      if (explosion.scale.x > 0) {
-        let relativeMove = this.move({sprite: explosion}, dt, currentTime);
-
-        if (relativeMove && (typeof relativeMove === 'object')) {
-          explosion.position.x += relativeMove.x;
-          explosion.position.y += relativeMove.y;
-        }
+      if (explosion.sprite.scale.x > 0) {
+        this.move(explosion, dt, currentTime);
       }
     }
   }
@@ -82,9 +73,9 @@ module.exports = class ExplosionManager {
   recycle(explosion, pos) {
     this._activeExplosions.splice(pos, 1);
     this._passiveExplosions.push(explosion);
-    explosion.position.x = -500;
-    explosion.position.y = -500;
-    explosion.rotation = 0;
-    explosion.scale.set(0, 0);
+    explosion.sprite.position.x = -500;
+    explosion.sprite.position.y = -500;
+    explosion.sprite.rotation = 0;
+    explosion.sprite.scale.set(0, 0);
   }
 };

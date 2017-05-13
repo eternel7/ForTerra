@@ -1,9 +1,12 @@
 const PIXI = require('pixi.js');
+const MovingSprite = require('./models/movingSprite');
 
-module.exports = class Explosion {
+module.exports = class Explosion extends MovingSprite {
 
   constructor(config) {
-    this._game = config.parent;
+    super(config);
+
+    this.vy = 1 / 50;
     //manage explosion animation
     let explosions = [];
     let explosionName = config.explosionName || "expl_06_00";
@@ -11,6 +14,6 @@ module.exports = class Explosion {
     for (let i = 0; i <= explosionSteps; i++) {
       explosions.push(PIXI.utils.TextureCache[explosionName + this._game.pad(i, 2, '0') + ".png"]);
     }
-    return new PIXI.extras.AnimatedSprite(explosions);
+    this.setSprite(new PIXI.extras.AnimatedSprite(explosions));
   }
 };
