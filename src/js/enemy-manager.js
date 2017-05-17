@@ -34,11 +34,7 @@ module.exports = class EnemyManager {
       enemy.sprite.position.x = this._game.getScreenXof(enemy, dt, t);
       enemy.sprite.position.y = enemy.worldY - ship.worldY;
       if (enemy.move) {
-        let relativeMove = enemy.move(enemy, dt, t);
-        if (relativeMove && (typeof relativeMove === 'object')) {
-          enemy.sprite.position.x += relativeMove.x;
-          enemy.sprite.position.y += relativeMove.y;
-        }
+        enemy.move(enemy, dt, t);
       }
       if (enemy.hittingBox) {
         let x = enemy.sprite.x - enemy.sprite.width / 2;
@@ -60,8 +56,6 @@ module.exports = class EnemyManager {
           enemy.hitbox.lineStyle(1, 0xa0ee00, 1);
           enemy.hitbox.drawRect(x, y, w, h);
         }
-      }
-      if (enemy.hittingBox) {
         for (let s = 0; s < this._game.spaceShips.length; s++) {
           this._game.spaceShips[s].checkHit(enemy.hittingBox, enemy.damage, t);
         }
@@ -72,7 +66,8 @@ module.exports = class EnemyManager {
   createEnemy(config) {
     let enemy = new Enemy({
       parent: this._game,
-      texture: config.texture});
+      texture: config.texture
+    });
     this.activeEnemies.push(enemy);
     enemy.enemyId = this.activeEnemies.length - 1;
   }

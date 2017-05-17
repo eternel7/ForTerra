@@ -18,8 +18,16 @@ module.exports = class MovingSprite {
     this.sprite.anchor.y = 0.5;
   }
 
+  act(el, dt, t) {
+   //by default not active => do not change of speed
+  }
+
   move(el, dt, t) {
-    this.sprite.position.x += dt * this.vx * this.depth * Math.sin(this.sprite.rotation);
-    this.sprite.position.y += dt * this.vy * this.depth * Math.cos(this.sprite.rotation);
+    if(this.act){
+      //active sprite can change their speed
+      this.act(el,dt,t);
+    }
+    this.worldX = this._game.mod(this.worldX + this.vx * dt,this._game.worldWidth);
+    this.worldY = this.worldY + this.vy * dt;
   }
 };

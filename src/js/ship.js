@@ -212,6 +212,7 @@ module.exports = class Ship {
     } else {
       this.yOffset = Math.max(this.yOffset - this.dy * dt, Math.round(this.sprites.horizontal.h / 2));
     }
+    this.worldY = this.yOffset;
   }
 
   accelerate(more, dt, t) {

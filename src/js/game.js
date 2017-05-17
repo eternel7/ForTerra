@@ -128,9 +128,9 @@ module.exports = class Game extends EventEmitter {
     let sprite = (el instanceof PIXI.Sprite) ? el : el.sprite;
     if (this.ship instanceof Ship && sprite instanceof PIXI.Sprite &&
       (typeof el.depth === 'number') && (typeof sprite.position.x === 'number')) {
-      //World is round sprite can be be nearer left or right
-      //take width of sprite as margin to not make it disappear once it touch a border of the screen
-      return this.mod(sprite.position.x + sprite.width - el.depth * this.ship.vx * dt, this.worldWidth) - sprite.width;
+      if(el.worldX){
+        return this.mod(el.worldX - this.ship.worldX + el.depth * this.renderer.width/2 + sprite.width,this.worldWidth) - sprite.width;
+      }
     }
     return -50;
   }

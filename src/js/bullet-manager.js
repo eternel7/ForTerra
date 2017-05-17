@@ -29,21 +29,27 @@ module.exports = class BulletManager {
     bullet.duration = 0;
     bullet.maxDuration = spaceShip.weaponmaxDuration || 5000; //in milliseconds
     bullet.friction = spaceShip.weaponFriction || 0.001;
-    bullet.normalSpeed = spaceShip.weaponSpeed || 3 ;
-    bullet.vx = bullet.normalSpeed + Math.abs(spaceShip.vx);
-    bullet.vy= 0;
+    bullet.normalSpeed = spaceShip.weaponSpeed || 3;
+    bullet.vx = (bullet.normalSpeed + Math.abs(spaceShip.vx)) * Math.sin(rotation);
+    bullet.vy = 0;
     bullet.damage = spaceShip.weaponDamage || 5;
     bullet.sprite.rotation = rotation;
+    bullet.sprite.position.y = bullet.worldY;
     bullet.source = spaceShip;
     this._activeBullets.push(bullet);
   }
 
+  act(el, dt, t) {
+    bullet.vx = Math.max(bullet.vx - bullet.friction, bullet.normalSpeed);
+  }
+
   update(dt, t) {
     let i, s, bullet;
+    let ship = this._game.ship;
 
     for (i = 0; i < this._activeBullets.length; i++) {
       bullet = this._activeBullets[i];
-      bullet.vx = Math.max(bullet.vx - bullet.friction, bullet.normalSpeed);
+      bullet.sprite.position.x = this._game.getScreenXof(bullet, dt, t);
       let distX = Math.sin(bullet.sprite.rotation) * bullet.vx * dt;
       bullet.distX += Math.abs(distX);
       bullet.duration += dt;
@@ -52,7 +58,7 @@ module.exports = class BulletManager {
         // Bullet made the max distance it could, time to recycle it
         this.recycleBullet(bullet, i);
       } else {
-        bullet.move(bullet,dt,t);
+        bullet.move(bullet, dt, t);
         // Bullet is still on stage, let's perform hit detection
         for (s = 0; s < this._game.spaceShips.length; s++) {
           if (this._game.spaceShips[s] === bullet.source) {
@@ -65,7 +71,7 @@ module.exports = class BulletManager {
         for (s = 0; s < this._game.enemyManager.activeEnemies.length; s++) {
           let enemy = this._game.enemyManager.activeEnemies[s];
           enemy.enemyId = s;
-          if(enemy.checkHit({sprite: bullet.sprite}, bullet.damage, t)) {
+          if (enemy.checkHit({sprite: bullet.sprite}, bullet.damage, t)) {
             this.recycleBullet(bullet, i);
           }
         }
@@ -83,7 +89,7 @@ module.exports = class BulletManager {
   }
 
   createBullet() {
-    let bullet = new MovingSprite({parent : this._game});
+    let bullet = new MovingSprite({parent: this._game});
     bullet.setSprite(new PIXI.Sprite(this.texture));
     bullet.sprite.position.x = -50;
     bullet.sprite.position.y = -50;
