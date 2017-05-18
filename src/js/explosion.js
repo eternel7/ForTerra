@@ -19,6 +19,6 @@ module.exports = class Explosion extends MovingSprite {
 
   act(el, dt, t) {
     this.vx = (this.vx > 0) ? Math.max(this.vx - 0.001, 0) : Math.min(this.vx + 0.001, 0);
-    this.vy = Math.min(this.vy + 0.001, 0.05);
+    this.vy = Math.min(this.vy + 0.005, 0.5);
   }
 };

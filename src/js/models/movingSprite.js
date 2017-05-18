@@ -1,5 +1,3 @@
-const PIXI = require('pixi.js');
-
 module.exports = class MovingSprite {
   constructor(config) {
     this._game = config.parent;
@@ -29,5 +27,7 @@ module.exports = class MovingSprite {
     }
     this.worldX = this._game.mod(this.worldX + this.vx * dt,this._game.worldWidth);
     this.worldY = this.worldY + this.vy * dt;
+    this.sprite.position.x = this._game.getScreenXof(this, dt, t);
+    this.sprite.position.y = this.worldY - this._game.ship.worldY;
   }
 };

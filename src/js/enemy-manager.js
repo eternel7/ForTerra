@@ -1,7 +1,5 @@
 const PIXI = require('pixi.js');
 const Enemy = require('./enemy');
-const Bump = require('./collision');
-const bump = new Bump();
 
 module.exports = class EnemyManager {
 
@@ -27,12 +25,9 @@ module.exports = class EnemyManager {
   }
 
   update(dt, t) {
-    const ship = this._game.ship;
     for (let i = 0; i < this.activeEnemies.length; i++) {
       let enemy = this.activeEnemies[i];
       enemy.enemyId = i;
-      enemy.sprite.position.x = this._game.getScreenXof(enemy, dt, t);
-      enemy.sprite.position.y = enemy.worldY - ship.worldY;
       if (enemy.move) {
         enemy.move(enemy, dt, t);
       }

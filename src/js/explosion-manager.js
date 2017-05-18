@@ -1,4 +1,3 @@
-const PIXI = require('pixi.js');
 const Explosion = require('./explosion');
 
 
@@ -53,7 +52,6 @@ module.exports = class ExplosionManager {
 
   update(dt, currentTime) {
     let i, explosion;
-    const ship = this._game.ship;
 
     for (i = 0; i < this._activeExplosions.length; i++) {
       explosion = this._activeExplosions[i];
@@ -61,8 +59,6 @@ module.exports = class ExplosionManager {
         this.recycle(explosion, i);
       }
       if (explosion.sprite.scale.x > 0) {
-        explosion.sprite.position.x = this._game.getScreenXof(explosion, dt, currentTime);
-        explosion.sprite.position.y = explosion.worldY - ship.worldY;
         explosion.move(explosion, dt, currentTime);
       }
     }

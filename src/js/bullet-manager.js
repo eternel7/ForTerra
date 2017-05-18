@@ -9,7 +9,7 @@ module.exports = class BulletManager {
     this._passiveBullets = [];
     this.texture = (config.texture || PIXI.utils.TextureCache["bullet_purple0004.png"]);
     //this.texture.frame = new PIXI.Rectangle(309, 263, 16, 16);
-    for (var i = 0; i < config.initialBullets; i++) {
+    for (let i = 0; i < config.initialBullets; i++) {
       this.createBullet();
     }
   }
@@ -23,7 +23,7 @@ module.exports = class BulletManager {
     bullet.sprite.position.x = x;
     bullet.sprite.position.y = y;
     bullet.worldX = spaceShip.worldX;
-    bullet.worldY = spaceShip.worldY;
+    bullet.worldY = spaceShip.worldY + spaceShip.yOffset ;
     bullet.distX = 0;
     bullet.maxDist = spaceShip.weaponMaxDist || this._game.worldWidth * 0.5;
     bullet.duration = 0;
@@ -36,20 +36,14 @@ module.exports = class BulletManager {
     bullet.sprite.rotation = rotation;
     bullet.sprite.position.y = bullet.worldY;
     bullet.source = spaceShip;
+
     this._activeBullets.push(bullet);
   }
-
-  act(el, dt, t) {
-    bullet.vx = Math.max(bullet.vx - bullet.friction, bullet.normalSpeed);
-  }
-
   update(dt, t) {
     let i, s, bullet;
-    let ship = this._game.ship;
 
     for (i = 0; i < this._activeBullets.length; i++) {
       bullet = this._activeBullets[i];
-      bullet.sprite.position.x = this._game.getScreenXof(bullet, dt, t);
       let distX = Math.sin(bullet.sprite.rotation) * bullet.vx * dt;
       bullet.distX += Math.abs(distX);
       bullet.duration += dt;
@@ -93,8 +87,11 @@ module.exports = class BulletManager {
     bullet.setSprite(new PIXI.Sprite(this.texture));
     bullet.sprite.position.x = -50;
     bullet.sprite.position.y = -50;
+    bullet.act = function (el, dt, t) {
+      this.vx = Math.max(this.vx - this.friction, this.normalSpeed);
+    };
     this._passiveBullets.push(bullet);
     //drawing bullet
     this._game.stage.addChild(bullet.sprite);
   }
-}
+};
