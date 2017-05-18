@@ -68,7 +68,6 @@ module.exports = class Enemy extends MovingSprite {
   }
 
   recycleEnemy() {
-    return;
     let i = this.enemyId;
     let sprite = this.sprite;
     this._game.explosionManager.spriteExplode(sprite, {explosionName: "expl_11_00", el: this});

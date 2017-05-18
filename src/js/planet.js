@@ -14,7 +14,7 @@ module.exports = class Planet extends MovingSprite {
     this.sprite.position.y = Math.random() * 150 + 300;
     this.worldX = this.sprite.position.x;
     this.worldY = this.sprite.position.y;
-    this.vx = 1/100 * Math.random() + 1/100 ;
+    this.vx = 1/200 * Math.random() + 1/500 ;
     this.depth = 0.05;
     this.damage = 0;
   }

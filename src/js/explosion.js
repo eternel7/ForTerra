@@ -16,4 +16,9 @@ module.exports = class Explosion extends MovingSprite {
     }
     this.setSprite(new PIXI.extras.AnimatedSprite(explosions));
   }
+
+  act(el, dt, t) {
+    this.vx = (this.vx > 0) ? Math.max(this.vx - 0.001, 0) : Math.min(this.vx + 0.001, 0);
+    this.vy = Math.min(this.vy + 0.001, 0.05);
+  }
 };

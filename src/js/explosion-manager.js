@@ -25,47 +25,45 @@ module.exports = class ExplosionManager {
 
   spriteExplode(sprite, config) {
     //manage explosion animation
-    this.explosion = new Explosion({
+    let explosion = new Explosion({
       parent: this._game,
       explosionName: config.explosionName || undefined,
       explosionSteps: explosionNameInfo[config.explosionName].steps
     });
 
-    this.explosion.sprite.position.x = sprite.position.x;
-    this.explosion.sprite.position.y = sprite.position.y;
-    this.explosion.sprite.anchor.x = 0.5;
-    this.explosion.sprite.anchor.y = 0.5;
-    this.explosion.sprite.rotation = config.rotation || sprite.rotation;
-    this.explosion.sprite.animationSpeed = config.animationSpeed || 0.3;
-    this.explosion.sprite.loop = false;
-    if (config.el && config.el.move) {
-      this.explosion.relativeMove = config.el.move(config.el, 1, 1);
-      this.explosion.relativeMove.x -= this._game.ship.vx;
-      this.explosion.relativeMove.y -= this._game.ship.vy;
+    explosion.sprite.position.x = sprite.position.x;
+    explosion.sprite.position.y = sprite.position.y;
+    explosion.sprite.anchor.x = 0.5;
+    explosion.sprite.anchor.y = 0.5;
+    explosion.sprite.rotation = config.rotation || sprite.rotation;
+    explosion.sprite.animationSpeed = config.animationSpeed || 0.3;
+    explosion.sprite.loop = false;
+    if (config.el.vx && config.el.vy) {
+      explosion.vx = config.el.vx;
+      explosion.vy = config.el.vy;
+      explosion.worldX = config.el.worldX;
+      explosion.worldY = config.el.worldY;
     }
-    this._game.stage.addChild(this.explosion.sprite);
-    this.explosion.startTime = window.performance.now();
-    this.explosion.duration = explosionNameInfo[config.explosionName].duration || 5000;
-    this.explosion.sprite.play();
-    this._activeExplosions.push(this.explosion);
-  }
-
-  move(el, dt, t) {
-    //TODO : move of explosion should be relative to ship speed
-    el.sprite.position.x += dt * el.vx * el.depth * Math.sin(el.sprite.rotation);
-    el.sprite.position.y += dt * el.vy * el.depth * Math.cos(el.sprite.rotation);
+    this._game.stage.addChild(explosion.sprite);
+    explosion.startTime = window.performance.now();
+    explosion.duration = explosionNameInfo[config.explosionName].duration || 5000;
+    explosion.sprite.play();
+    this._activeExplosions.push(explosion);
   }
 
   update(dt, currentTime) {
-    let i, s, explosion;
+    let i, explosion;
+    const ship = this._game.ship;
 
     for (i = 0; i < this._activeExplosions.length; i++) {
       explosion = this._activeExplosions[i];
-      if (explosion && currentTime > explosion.startTime + explosion.duration * explosion.animationSpeed) {
+      if (explosion && currentTime > explosion.startTime + explosion.duration * explosion.sprite.animationSpeed) {
         this.recycle(explosion, i);
       }
       if (explosion.sprite.scale.x > 0) {
-        this.move(explosion, dt, currentTime);
+        explosion.sprite.position.x = this._game.getScreenXof(explosion, dt, currentTime);
+        explosion.sprite.position.y = explosion.worldY - ship.worldY;
+        explosion.move(explosion, dt, currentTime);
       }
     }
   }
