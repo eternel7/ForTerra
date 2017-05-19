@@ -64,7 +64,7 @@ module.exports = class Game extends EventEmitter {
 
     this.enemyManager = new EnemyManager({
       parent: _this,
-      initialEnemies: this.worldSizeFactor * 10
+      initialEnemies: this.worldSizeFactor * 5
     });
 
     this.ship = new Ship({

@@ -50,7 +50,7 @@ module.exports = class BulletManager {
       if (bullet.distX > bullet.maxDist ||
         bullet.duration > bullet.maxDuration) {
         // Bullet made the max distance it could, time to recycle it
-        this.recycleBullet(bullet, i);
+        this.recycle(bullet, i);
       } else {
         bullet.move(bullet, dt, t);
         // Bullet is still on stage, let's perform hit detection
@@ -59,23 +59,23 @@ module.exports = class BulletManager {
             continue;
           }
           if (this._game.spaceShips[s].checkHit({sprite: bullet.sprite}, bullet.damage, t)) {
-            this.recycleBullet(bullet, i);
+            this.recycle(bullet, i);
           }
         }
         for (s = 0; s < this._game.enemyManager.activeEnemies.length; s++) {
           let enemy = this._game.enemyManager.activeEnemies[s];
           enemy.enemyId = s;
           if (enemy.checkHit({sprite: bullet.sprite}, bullet.damage, t)) {
-            this.recycleBullet(bullet, i);
+            this.recycle(bullet, i);
           }
         }
       }
     }
   }
 
-  recycleBullet(bullet, i) {
-    bullet.sprite.position.x = -50;
-    bullet.sprite.position.y = -50;
+  recycle(bullet, i) {
+    bullet.sprite.x = -500;
+    bullet.sprite.y = -500;
     bullet.sprite.rotation = 0;
     bullet.source = null;
     this._activeBullets.splice(i, 1);
@@ -85,10 +85,10 @@ module.exports = class BulletManager {
   createBullet() {
     let bullet = new MovingSprite({parent: this._game});
     bullet.setSprite(new PIXI.Sprite(this.texture));
-    bullet.sprite.position.x = -50;
-    bullet.sprite.position.y = -50;
+    bullet.sprite.x = -500;
+    bullet.sprite.y = -500;
     bullet.act = function (el, dt, t) {
-      this.vx = Math.max(this.vx - this.friction, this.normalSpeed);
+      this.vx = Math.max(this.vx - this.friction, this.normalSpeed) * Math.sin(bullet.sprite.rotation);
     };
     this._passiveBullets.push(bullet);
     //drawing bullet

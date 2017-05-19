@@ -32,7 +32,7 @@ module.exports = class Enemy extends MovingSprite {
         h: -20
       }
     };
-    this.damage = 0;
+    this.damage = 100;
     this._timeLastHit = 0;
     this.HIT_INTERVAL = 200;
     //this.hitbox = new PIXI.Graphics();
@@ -45,7 +45,16 @@ module.exports = class Enemy extends MovingSprite {
   }
 
   act(el, dt, t) {
-    this.vy = Math.cos(t / 1000) /20 + this.randomNumberY * t / 100000;
+    if(this.worldY> this._game.renderer.height*3/4){
+      this.verticalMod = true;
+    } else if(this.worldY < 50){
+      this.verticalMod = false;
+    }
+    if(this.verticalMod){
+      this.vy = Math.cos(t / 1000) /20 - this.randomNumberY/3;
+    } else {
+      this.vy = Math.cos(t / 1000) /20 + this.randomNumberY/3;
+    }
   }
 
   /**

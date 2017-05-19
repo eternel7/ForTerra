@@ -37,7 +37,7 @@ module.exports = class Ship {
     this.state = 1; // -1 boom - 1 start - other number for other animations
     this._timeLastBulletFired = 0;
     // Time that passes between shots
-    this.FIRE_INTERVAL = 500;
+    this.FIRE_INTERVAL = 300;
     this.HIGHLIGHT_INTERVAL = 100;
     this.GAMEOVER_INTERVAL = 2000;
     this.GAMEOVER_ANIMATION_DURATION = 5000;
@@ -179,12 +179,13 @@ module.exports = class Ship {
           // oh dear, we're dead
           this.state = -1;
 
-          this._game.explosionManager.spriteExplode(this._ship,{
+          this._game.explosionManager.spriteExplode(this._ship, {
             explosionName: "expl_06_00",
             el: this,
-            animationSpeed: 0.3});
-          this._ship.position.x = -50;
-          this._ship.position.y = -50;
+            animationSpeed: 0.3
+          });
+          this._ship.position.x = -500;
+          this._ship.position.y = -500;
           this.updateLifeBarStyle();
         } else {
           // still alive, but taken some damage. Update text color from green to red
@@ -259,6 +260,8 @@ module.exports = class Ship {
     this.gameOver.scale.x = 0;
     this.xOffset = this.startXOffset;
     this.yOffset = this.startYOffset;
+    this.worldX = this.startXOffset;
+    this.worldY = this.startYOffset;
     this.health = this.MAX_HEALTH;
     this.gameOverTime = 0;
     this.endTime = 0;
@@ -308,7 +311,7 @@ module.exports = class Ship {
       if (!this.gameOver) {
         //add game over sprite if needed
         this.addGameOver(currentTime);
-      } else if (!this.gameOverTime){
+      } else if (!this.gameOverTime) {
         //set  game over timing
         this.gameOverTime = currentTime;
         this.endTime = this.gameOverTime + this.GAMEOVER_INTERVAL + this.GAMEOVER_ANIMATION_DURATION;

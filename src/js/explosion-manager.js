@@ -40,7 +40,11 @@ module.exports = class ExplosionManager {
     if (config.el.vx && config.el.vy) {
       explosion.vx = config.el.vx;
       explosion.vy = config.el.vy;
-      explosion.worldX = config.el.worldX;
+    }
+    explosion.worldX = config.el.worldX;
+    if (config.el.yOffset) {
+      explosion.worldY = config.el.worldY + config.el.yOffset;
+    } else {
       explosion.worldY = config.el.worldY;
     }
     this._game.stage.addChild(explosion.sprite);
@@ -67,8 +71,8 @@ module.exports = class ExplosionManager {
   recycle(explosion, pos) {
     this._activeExplosions.splice(pos, 1);
     this._passiveExplosions.push(explosion);
-    explosion.sprite.position.x = -500;
-    explosion.sprite.position.y = -500;
+    explosion.sprite.x = -500;
+    explosion.sprite.y = -500;
     explosion.sprite.rotation = 0;
     explosion.sprite.scale.set(0, 0);
   }
